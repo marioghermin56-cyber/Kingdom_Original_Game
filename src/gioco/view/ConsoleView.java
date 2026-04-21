@@ -29,6 +29,14 @@ public class ConsoleView implements IView {
 		}
 	}
 	
+	public double getScaleX() {
+		return 1.0;
+	}
+	
+	public double getScaleY() {
+		return 1.0;
+	}
+	
 	@Override
 	public void showMessage(String message) {
 		System.out.println("MESSAGGIO >> " + message);

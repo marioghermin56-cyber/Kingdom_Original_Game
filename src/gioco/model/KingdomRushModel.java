@@ -9,7 +9,7 @@ public class KingdomRushModel implements IModel{
 	private boolean gameOver;
 	private List<TowerSlot> slots;
 	private List<Enemy> enemies;
-    private List<Point> enemyPath;
+    //private List<Point> enemyPath;
     private List<Wave> waves;
     private int currentWaveIndex;
     private int spawnTimer;
@@ -19,49 +19,19 @@ public class KingdomRushModel implements IModel{
     private List<Soldier> activeSoldiers;
     private boolean isSettingRallyPoint = false;
 	private TowerSlot activeBarracksSlot = null;
+	private TowerSlot hoveredSlot = null;
+	private List<EnemyPath> enemyPath;
 	
 	public KingdomRushModel(int startingHealth, int startingGold) {
 		this.playerHealth = startingHealth;
 		this.gold = startingGold;
 		this.gameOver = false;
 		this.enemies = new ArrayList<>();
-		this.enemyPath = new ArrayList();
 		this.projectiles = new ArrayList();
-		this.slots = new ArrayList<>();
 		this.waves = new ArrayList<>();
 		this.activeSoldiers = new ArrayList<>();
-		
-		slots.add(new TowerSlot(226,160));
-		slots.add(new TowerSlot(359,357));
-		slots.add(new TowerSlot(763,424));
-		
-		enemyPath.add(new Point(164,0));
-		enemyPath.add(new Point(176,25));
-		enemyPath.add(new Point(198,49));
-		enemyPath.add(new Point(221,64));
-		enemyPath.add(new Point(236,74));
-		enemyPath.add(new Point(272,78));
-		enemyPath.add(new Point(320,93));
-		enemyPath.add(new Point(354,112));
-		enemyPath.add(new Point(372,147));
-		enemyPath.add(new Point(384,171));
-		enemyPath.add(new Point(390,230));
-		enemyPath.add(new Point(410,270));
-		enemyPath.add(new Point(444,285));
-		enemyPath.add(new Point(481,295));
-		enemyPath.add(new Point(532,300));
-		enemyPath.add(new Point(576,320));
-		enemyPath.add(new Point(604,350));
-		enemyPath.add(new Point(611,370));
-		enemyPath.add(new Point(616,375));
-		enemyPath.add(new Point(642,482));
-		enemyPath.add(new Point(666,505));
-		enemyPath.add(new Point(722,520));
-		enemyPath.add(new Point(930,527));
-		enemyPath.add(new Point(948,530));
-		enemyPath.add(new Point(986,550));
-		enemyPath.add(new Point(1014,580));
-		enemyPath.add(new Point(1277,580));
+		this.enemyPath = MapLoader.loadPathsFromTMX("/assets/maps/tail_6.tmx");
+		this.slots = MapLoader.loadSlotsFromTMX("/assets/maps/tail_6.tmx");
 		
 		
 		waves.add(new Wave(10,25,Enemy.GOBLIN_TYPE));
@@ -70,8 +40,23 @@ public class KingdomRushModel implements IModel{
 	}
 	
 	@Override
+	public List<EnemyPath> getMapPaths() {
+        return enemyPath;
+    }
+	
+	@Override
 	public TowerSlot getSelectedBuildSlot() {
 		return selectedSlot;
+	}
+	
+	@Override
+	public TowerSlot getHoveredSlot() {
+		return this.hoveredSlot;
+	}
+	
+	@Override 
+	public void setHoveredSlot(TowerSlot slot) {
+		this.hoveredSlot = slot;
 	}
 	
 	@Override
@@ -93,32 +78,41 @@ public class KingdomRushModel implements IModel{
 		return isSettingRallyPoint;
 	}
 	
-	public void setRallyPoint(int mouseX, int mouseY) {
-		if (!isSettingRallyPoint || activeBarracksSlot == null) return;
+	public void setRallyPoint(int logicalX, int logicalY) {
+	    if (!isSettingRallyPoint || activeBarracksSlot == null) return;
 
+	    Tower tower = activeBarracksSlot.getTower();
 
-		double distToTower = Math.hypot(mouseX - activeBarracksSlot.getX(), mouseY - activeBarracksSlot.getY());
+	    // 1. Calcoliamo il vero centro della piazzola (come nella View)
+	    int cx = activeBarracksSlot.getX() + (activeBarracksSlot.getWidth() / 2);
+	    int cy = activeBarracksSlot.getY() + (activeBarracksSlot.getHeight() / 2);
 
-		if (distToTower <= 200) {
-			
-			activeBarracksSlot.getTower().setRallyPoint(new Point(mouseX, mouseY));
+	    // 2. Calcoliamo se il click è dentro al range partendo dal CENTRO
+	    double distToTower = Math.hypot(logicalX - cx, logicalY - cy);
 
-			List<Soldier> mySoldiers = new ArrayList<>();
-			for (Soldier s : activeSoldiers) {
+	    // Usa tower.getRange() se la tua torre ha quel getter, oppure lascia 200!
+	    if (distToTower <= tower.getRange()) {
+	        
+	        tower.setRallyPoint(new Point(logicalX, logicalY));
 
-				if (Math.hypot(s.getX() - activeBarracksSlot.getX(), s.getY() - activeBarracksSlot.getY()) < 250) {
-					mySoldiers.add(s);
-				}
-			}
+	        // 3. IL FIX DEI SOLDATI: Troviamo i nostri soldati tramite la carta d'identità
+	        List<Soldier> mySoldiers = new ArrayList<>();
+	        for (Soldier s : activeSoldiers) {
+	            if (s.getParentTower() == tower) {
+	                mySoldiers.add(s);
+	            }
+	        }
 
-			if (mySoldiers.size() > 0) mySoldiers.get(0).setDestination(new Point(mouseX - 20, mouseY - 20));
-			if (mySoldiers.size() > 1) mySoldiers.get(1).setDestination(new Point(mouseX + 20, mouseY - 20));
-			if (mySoldiers.size() > 2) mySoldiers.get(2).setDestination(new Point(mouseX, mouseY + 20));
-		}
+	        // 4. Assegniamo le nuove destinazioni sfalsate per tenerli in formazione
+	        if (mySoldiers.size() > 0) mySoldiers.get(0).setDestination(new Point(logicalX - 20, logicalY - 20));
+	        if (mySoldiers.size() > 1) mySoldiers.get(1).setDestination(new Point(logicalX + 20, logicalY - 20));
+	        if (mySoldiers.size() > 2) mySoldiers.get(2).setDestination(new Point(logicalX, logicalY + 20));
+	    }
 
-		isSettingRallyPoint = false;
-		activeBarracksSlot = null;
-	}	
+	    // A prescindere che il click fosse valido o fuori range, usciamo dalla modalità
+	    isSettingRallyPoint = false;
+	    activeBarracksSlot = null;
+	}
 	
 	@Override
 	public void upgradeSelectedTower() {
@@ -232,7 +226,7 @@ public class KingdomRushModel implements IModel{
 					int numSoldiers = 0;
 					boolean[] occupiedIndex = new boolean[3];
 					for (Soldier soldier : activeSoldiers) {
-						if (Math.hypot(soldier.getX() - slot.getX(), soldier.getY() - slot.getY()) < 250) {
+						if (soldier.getParentTower() == tower) {
 							numSoldiers++;
 							occupiedIndex[soldier.getFormationIndex()] = true;
 							if(numSoldiers >= 3) {
@@ -275,7 +269,7 @@ public class KingdomRushModel implements IModel{
 								}
 							
 							// C. CREIAMO IL SOLDATO DANDOGLI LA SUA "MATRICOLA"
-							Soldier newSoldier = new Soldier(spawnX, spawnY, freeIndex);
+							Soldier newSoldier = new Soldier(spawnX, spawnY, freeIndex, tower);
 							soldiersToAdd.add(newSoldier);
 							
 							
@@ -379,9 +373,9 @@ public class KingdomRushModel implements IModel{
 
 			if (spawnTimer >= currentWave.getSpawnDelay() && !currentWave.isFinished()) {
 				int type = currentWave.getEnemyType();
-				if(type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40,1.5,enemyPath,5,type,tikCounter,3, 11));
-				else if(type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(20,3,enemyPath,3,type,tikCounter,3 , 8));
-				else if(type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(90,1,enemyPath,12,type,tikCounter,3 , 15));
+				if(type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40,0.5,enemyPath.get(0),5,type,tikCounter,3, 11));
+				else if(type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(20,0.8,enemyPath.get(1),3,type,tikCounter,3 , 8));
+				else if(type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(90,0.3,enemyPath.get(0),12,type,tikCounter,3 , 15));
 				 
 				currentWave.decreaseEnemyCount();
 				spawnTimer = 0; 
@@ -434,21 +428,30 @@ public class KingdomRushModel implements IModel{
 		return gameOver;
 	}
 	
-	public List<Point> getEnemyPath(){
-		return this.enemyPath;
-	}
-	
+	// 2. Il tuo metodo aggiornato per il Rally Point
 	private Point calculateDefaultRallyPoint(int towerX, int towerY) {
 		Point closestPoint = new Point(towerX, towerY);
 		double minDistance = Double.MAX_VALUE;
 		
-		for(Point pathPoint : enemyPath) {
-			double dist = Math.hypot(towerX - pathPoint.getX(), towerY - pathPoint.getY());
-			if(dist < minDistance) {
-				minDistance = dist;
-				closestPoint = new Point(pathPoint.getX(), pathPoint.getY());
+		// Scorriamo TUTTI i percorsi della mappa (se hai più di una strada)
+		for(EnemyPath path : this.enemyPath) {
+			
+			// Scorriamo i punti (waypoints) dentro il singolo percorso
+			for(Point pathPoint : path.getWaypoints()) {
+				
+				// Il tuo Math.hypot è perfetto qui!
+				double dist = Math.hypot(towerX - pathPoint.getX(), towerY - pathPoint.getY());
+				
+				if(dist < minDistance) {
+					minDistance = dist;
+					
+					// Salviamo le coordinate del punto più vicino
+					closestPoint = new Point(pathPoint.getX(), pathPoint.getY());
+				}
 			}
-		} return closestPoint;
+		} 
+		
+		return closestPoint;
 	}
 	
 	

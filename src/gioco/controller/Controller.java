@@ -52,42 +52,106 @@ public class Controller extends MouseAdapter{
 	
 	public void attachToPanel(JPanel panel) {
         panel.addMouseListener(this);
+        panel.addMouseMotionListener(this);
     }
 	
 	@Override
-    public void mouseClicked(MouseEvent e) {
-        // Quando l'utente clicca, controlliamo se ha preso uno slot
-        int mouseX = e.getX();
-        int mouseY = e.getY();
-        
-        checkSlotSelection(mouseX, mouseY);
-
-    }
+	public void mouseClicked(MouseEvent e) {
+	    // 1. Chiediamo alla View la scala attuale
+	    double scaleX = view.getScaleX();
+	    double scaleY = view.getScaleY();
+	    
+	    // 2. Traduzione in coordinate logiche
+	    int logicalX = (int) (e.getX() / scaleX);
+	    int logicalY = (int) (e.getY() / scaleY);
+	    
+	    boolean slotClicked = false; // Ci serve per capire se abbiamo cliccato a vuoto
+	    
+	    checkSlotSelection(logicalX,logicalY);
+	    
+	    // 3. Nuova collisione perfetta con la Hitbox di Tiled!
+	    for (TowerSlot slot : model.getAvailableSlots()) {
+	        if (logicalX >= slot.getX() && logicalX <= slot.getX() + slot.getWidth() &&
+	            logicalY >= slot.getY() && logicalY <= slot.getY() + slot.getHeight()) {
+	            
+	            // Abbiamo cliccato su uno slot!
+	            model.selectBuildSlot(slot); // (O setSelectedBuildSlot, usa il nome che hai nel model)
+	            slotClicked = true;
+	            break;
+	        }
+	    }
+	    
+	    // 4. CHICCA UX: Se ho cliccato fuori da qualsiasi slot, chiudo il menu!
+	    if (!slotClicked) {
+	        model.selectBuildSlot(null);
+	    }
+	    
+	    // 5. Ridisegniamo tutto alla fine
+	    view.render(model);
+	}
+	
+	@Override
+	public void mouseMoved(MouseEvent e) {
+	    // 1. Chiediamo alla View la scala attuale per il responsive design
+	    double scaleX = view.getScaleX();
+	    double scaleY = view.getScaleY();
+	    
+	    // 2. Traduciamo le coordinate del mouse in coordinate logiche
+	    int logicalX = (int) (e.getX() / scaleX);
+	    int logicalY = (int) (e.getY() / scaleY);
+	    
+	    // Variabile temporanea per capire cosa stiamo guardando ORA
+	    TowerSlot currentlyHovered = null;
+	    
+	    // 3. Controlliamo la collisione perfetta con la hitbox di Tiled
+	    for (TowerSlot slot : model.getAvailableSlots()) {
+	        if (logicalX >= slot.getX() && logicalX <= slot.getX() + slot.getWidth() &&
+	            logicalY >= slot.getY() && logicalY <= slot.getY() + slot.getHeight()) {
+	            
+	            // Abbiamo trovato lo slot sotto il mouse!
+	            currentlyHovered = slot; 
+	            break; // Usciamo dal ciclo, non serve cercare oltre
+	        }
+	    }
+	    
+	    // 4. PRESTAZIONI: Aggiorniamo il Model e ridisegniamo SOLO se c'è un cambiamento.
+	    // Evita che Java faccia il "render" mille volte al secondo se muovi
+	    // il mouse stando fermo sempre sullo stesso slot (o sul prato vuoto).
+	    if (model.getHoveredSlot() != currentlyHovered) {
+	        model.setHoveredSlot(currentlyHovered);
+	        view.render(model);
+	    }
+	}
 	
 
 
 	
-	private void checkSlotSelection(int mx, int my) {
-		
-		if (model.isSettingRallyPoint()) {
-            model.setRallyPoint(mx, my);
-            view.render(model);
-            return; // Esce subito, non fa nient'altro!
-        }
-		
-        List<TowerSlot> slots = model.getAvailableSlots();
-        for (int i = 0; i < slots.size(); i++) {
-            TowerSlot slot = slots.get(i);
-            
-            // Collisione click con lo slot
-            if (mx >= slot.getX() - 20 && mx <= slot.getX() + 20 &&
-                my >= slot.getY() - 20 && my <= slot.getY() + 20) {
-                    model.selectBuildSlot(slot); // Apre il menu
-                    return;
-            }
-        }
-        model.deselectBuildSlot();
-    }
+	private void checkSlotSelection(int logicalX, int logicalY) {
+	    
+	    // 1. Gestione Rally Point (Rimane identica, usa già le coordinate giuste)
+	    if (model.isSettingRallyPoint()) {
+	        model.setRallyPoint(logicalX, logicalY);
+	        view.render(model);
+	        return; // Esce subito, non fa nient'altro!
+	    }
+	    
+	    // 2. Controllo click sulle hitbox di Tiled
+	    List<TowerSlot> slots = model.getAvailableSlots();
+	    for (int i = 0; i < slots.size(); i++) {
+	        TowerSlot slot = slots.get(i);
+	        
+	        // Nuova collisione geometrica con width e height!
+	        if (logicalX >= slot.getX() && logicalX <= slot.getX() + slot.getWidth() &&
+	            logicalY >= slot.getY() && logicalY <= slot.getY() + slot.getHeight()) {
+	                
+	                model.selectBuildSlot(slot); // Apre il menu
+	                return; // Trovato, usciamo dal metodo!
+	        }
+	    }
+	    
+	    // 3. Se il ciclo finisce e non ha trovato nulla, clic a vuoto -> chiudi menu
+	    model.deselectBuildSlot();
+	}
 	
     
 
@@ -111,7 +175,7 @@ public class Controller extends MouseAdapter{
         
         // 2. Crea e avvia il loop del gioco (20ms = ~50 FPS)
         if (gameTimer == null) { // Evita di far partire più timer se si clicca più volte
-            gameTimer = new Timer(20, e -> {
+            gameTimer = new Timer(16, e -> {
                 model.updateGame();      // Il Model aggiorna le posizioni di nemici/torri
                 view.render(model); // La View ridisegna tutto basandosi sul nuovo stato
             });

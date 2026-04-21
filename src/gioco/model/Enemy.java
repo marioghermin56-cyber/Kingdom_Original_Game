@@ -16,10 +16,11 @@ public class Enemy {
 	public static final int SKINHEAD_TYPE = 9;
 	public static final int DEADSWORDSMAN_TYPE = 10;
 	
-	private int x, y;
+	private double x, y;
 	private int health;
 	private double speed;
-	private List<Point> path;
+	
+	private EnemyPath path;
 	private int targetWayPointIndex;
 	private int value;
 	private int maxHealth;
@@ -30,7 +31,7 @@ public class Enemy {
 	private int attackCooldown;
 	private int currentCooldown;
 	
-	public Enemy(int health, double speed, List<Point> path, int value, int type, int tikCounter, int attackDamage, int attackCooldown) {
+	public Enemy(int health, double speed, EnemyPath path, int value, int type, int tikCounter, int attackDamage, int attackCooldown) {
 		this.health = health;
 		this.maxHealth = health;
 		this.speed = speed;
@@ -44,9 +45,10 @@ public class Enemy {
 		this.attackCooldown = attackCooldown;
 		this.currentCooldown = attackCooldown;
 		
-		if(!path.isEmpty()) {
-			this.x = path.get(0).getX();
-			this.y = path.get(0).getY();
+		if(path != null && !path.getWaypoints().isEmpty()) {
+			gioco.model.Point spawnPoint = path.getWaypoints().get(0);
+			this.x = spawnPoint.getX();
+			this.y = spawnPoint.getY();
 		}
 		
 	}
@@ -83,11 +85,11 @@ public class Enemy {
 		return this.maxHealth;
 	}
 	
-	public int getX() {
+	public double getX() {
 		return x;
 	}
 	
-	public int getY() {
+	public double getY() {
 		return y;
 	}
 	
@@ -100,7 +102,7 @@ public class Enemy {
 	}
 	
 	public boolean hasReachedEnd() {
-		return targetWayPointIndex >= path.size();
+		return targetWayPointIndex >= path.getWaypoints().size();
 	}
 	
 	public void takeDamage(int amount) {
@@ -115,34 +117,33 @@ public class Enemy {
 		this.isBlocked = blocked;
 	}
 	
-	public void move() {
+public void move() {
 		
-		if(isBlocked) {
-			return;
+		if(isBlocked || hasReachedEnd()) {
+			return; // Se è bloccato o arrivato alla fine, non fa nulla
 		}
 		
-		if(hasReachedEnd()) {
-			return;
+		// Peschiamo il prossimo punto da raggiungere
+		Point target = path.getWaypoints().get(targetWayPointIndex);
+		
+		// Calcoliamo le distanze su asse X e Y
+		double dx = target.getX() - this.x;
+		double dy = target.getY() - this.y;
+		
+		// Teorema di Pitagora per trovare la distanza totale in linea retta
+		double distance = Math.sqrt((dx * dx) + (dy * dy));
+		
+		// Se la distanza rimanente è minore della nostra velocità, siamo arrivati al waypoint!
+		if (distance <= speed) {
+			this.x = target.getX();
+			this.y = target.getY();
+			targetWayPointIndex++; // Puntiamo al prossimo waypoint!
+		} else {
+			// Altrimenti, facciamo un passo verso il waypoint.
+			// (dx / distance) e (dy / distance) creano il vettore normalizzato
+			this.x += (dx / distance) * speed;
+			this.y += (dy / distance) * speed;
 		}
-		
-		
-		Point target = path.get(targetWayPointIndex);
-		
-		if(this.x < target.getX()) {
-			this.x += Math.min(speed,target.getX() - this.x ); 
-		} else if (this.x > target.getX()) {
-			this.x -= Math.min(speed, this.x - target.getX());
-		} 
-		
-		if(this.y < target.getY()) {
-			this.y += Math.min(speed, target.getY() - this.y);
-		} else if(this.y > target.getY()) {
-			this.y -= Math.min(speed, this.y - target.getY());
-		}
-		
-		if (this.x == target.getX() && this.y == target.getY()) {
-            targetWayPointIndex++;
-        }
 		
 		this.tikCounter++;
 	}

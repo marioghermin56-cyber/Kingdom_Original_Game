@@ -16,9 +16,10 @@ public class Soldier {
 	private boolean isMoving = false;
 	private int formationIndex;
 	private int tikCounter=0;
+	private Tower parentTower;
 
 	
-	public Soldier(double x, double y, int formationIndex) {
+	public Soldier(double x, double y, int formationIndex, Tower parentTower) {
 		this.x = x;
 		this.y = y;
 		this.maxHealth = 50;
@@ -30,11 +31,16 @@ public class Soldier {
 		this.destX = x;
 		this.destY = y;
 		this.formationIndex = formationIndex;
+		this.parentTower = parentTower;
 	}
 	
 	
 	public int getFormationIndex() {
 		return this.formationIndex;
+	}
+	
+	public Tower getParentTower() {
+		return this.parentTower;
 	}
 	
 	public int getTikCounter() {

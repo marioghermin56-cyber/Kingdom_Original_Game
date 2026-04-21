@@ -1,39 +1,79 @@
 package gioco.view;
 
 import gioco.model.*;
+import javax.swing.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
-import javax.swing.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage; // Importante per le immagini vere
-import javax.imageio.ImageIO;      // Per caricare immagini .png
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
 
 public class SwingView implements IView{
-    private JFrame frame;
-    private GamePanel gamePanel;
+	private JFrame frame;
     private IModel model;
-    private JButton archerButton;
-    private JButton mageButton;
-    private JButton cannonButton;
-    private JButton barracksButton;
-    private Font font;
-    private Font mainFont;
-    private Font winLoseFont;
-    private Font menuFont;
-    private JButton rallyButton;
-    private JButton upgradeButton;
-    private BufferedImage playIcon;
-    private BufferedImage menuImage;
+    private GamePanel gamePanel;
+    
+    private JButton archerButton, mageButton, cannonButton, barracksButton, rallyButton, upgradeButton;
+    private Font font, mainFont, winLoseFont;
+    private BufferedImage playIcon, menuImage;
     
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainContainer = new JPanel(cardLayout);
     private JPanel menuPanel;
+    private double scaleX = 1.0;
+    private double scaleY = 1.0;
+    
+    
+    public SwingView() {
+    	frame = new JFrame("Pseudo Kingdom Rush - MVC Alpha");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(true); 
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+
+        // 1. PRIMA CREIAMO I BOTTONI! (Così esistono in memoria)
+        archerButton = createTransparentButton();
+        mageButton = createTransparentButton();
+        barracksButton = createTransparentButton();
+        cannonButton = createTransparentButton();
+        
+        rallyButton = createTransparentButton();
+        rallyButton.setText("MOVE");
+        rallyButton.setOpaque(true);
+        rallyButton.setBackground(new Color(0, 0, 255, 150));
+        
+        upgradeButton = createTransparentButton();
+        upgradeButton.setOpaque(true);
+        upgradeButton.setBackground(new Color(255, 215, 0, 200));
+
+        // 2. SOLO ORA CREIAMO IL PANNELLO!
+        // (Adesso quando loadAssets cercherà archerButton, lo troverà pronto!)
+        gamePanel = new GamePanel();
+        gamePanel.setLayout(null); 
+
+        // 3. ORA POSSIAMO AGGIUNGERLI AL PANNELLO
+        gamePanel.add(archerButton);
+        gamePanel.add(mageButton);
+        gamePanel.add(cannonButton);
+        gamePanel.add(barracksButton);
+        gamePanel.add(rallyButton);
+        gamePanel.add(upgradeButton);
+
+        // ... (il resto del codice, initMenuPanel, CardLayout, ecc.) ...
+        
+        initMenuPanel();
+        mainContainer.add(menuPanel, "MENU");
+        mainContainer.add(gamePanel, "GAME");
+        frame.add(mainContainer);
+        
+        cardLayout.show(mainContainer, "MENU");
+        frame.setVisible(true);
+    }
+    
+    public double getScaleX() { return scaleX; }
+    public double getScaleY() { return scaleY; }
     
     @Override
     public void addUpgradeListener(ActionListener listener) {
@@ -60,103 +100,37 @@ public class SwingView implements IView{
     public void addRallyListener(ActionListener listener) {
         rallyButton.addActionListener(listener);
     }
-
-    public SwingView() {
-        // Creiamo la finestra principale
-        frame = new JFrame("Pseudo Kingdom Rush - MVC Alpha");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //frame.setPreferredSize(new Dimension(800,600));
-        frame.setLocationRelativeTo(null);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setResizable(false);
-        
-        archerButton = createTransparentButton();
-        mageButton = createTransparentButton();
-        barracksButton = createTransparentButton();
-        cannonButton = createTransparentButton();
-        
-        rallyButton = createTransparentButton();
-        rallyButton.setText("MOVE");
-        rallyButton.setOpaque(true);
-        rallyButton.setBackground(new Color(0, 0, 255, 150));
-        
-        upgradeButton = createTransparentButton();
-        upgradeButton.setOpaque(true);
-        upgradeButton.setBackground(new Color(255, 215, 0, 200));
-
-        // Creiamo il pannello di disegno interno
-        gamePanel = new GamePanel();
-        
-        initMenuPanel();
-        mainContainer.add(menuPanel, "MENU");
-        mainContainer.add(gamePanel, "GAME");
-
-        frame.add(mainContainer);
-        cardLayout.show(mainContainer, "MENU"); // Mostra il menu all'inizio
-        gamePanel.setLayout(null);
-
-        frame.setVisible(true);
-        
-        gamePanel.add(archerButton);
-        gamePanel.add(barracksButton);
-        gamePanel.add(cannonButton);
-        gamePanel.add(mageButton);
-        gamePanel.add(rallyButton);
-        gamePanel.add(upgradeButton);
-        
-        frame.setVisible(true);
-    }
     
     private void initMenuPanel() {
-    	
-    	try {
-    		menuImage = ImageIO.read(getClass().getResourceAsStream("/assets/background/bg.png"));
-    	}catch(IOException e) {
-    		e.printStackTrace();
-    	}
+        menuImage = loadImage("/assets/background/bg.png");
+        
         menuPanel = new JPanel(new GridBagLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                // Sfondo marrone scuro
-                g.drawImage(menuImage,0,0,getWidth() ,getHeight(),null);;
-                
+                if (menuImage != null) {
+                    g.drawImage(menuImage, 0, 0, getWidth(), getHeight(), null);
+                }
                 if (font != null) {
-                    Font menuFont = font.deriveFont(60f);
-                    g.setColor(new Color(236, 204, 120)); // Colore oro
-                    g.setFont(menuFont);
+                    g.setFont(font.deriveFont(60f));
+                    g.setColor(new Color(236, 204, 120));
                     String title = "KINGDOM RUSH";
-                    FontMetrics fm = g.getFontMetrics();
-                    int x = (getWidth() - fm.stringWidth(title)) / 2;
+                    int x = (getWidth() - g.getFontMetrics().stringWidth(title)) / 2;
                     g.drawString(title, x, 200);
                 }
             }
         };
         
         JButton startButton = new JButton();
+        playIcon = loadImage("/assets/background/button_play.png");
+        if (playIcon != null) startButton.setIcon(new ImageIcon(playIcon));
+        else startButton.setText("START");
         
-        try {
-            playIcon = ImageIO.read(getClass().getResourceAsStream("/assets/background/button_play.png"));
-            if (playIcon != null) {
-                startButton.setIcon(new ImageIcon(playIcon));
-            } else {
-                startButton.setText("START"); // Fallback di emergenza se non trova l'immagine
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-            startButton.setText("START");
-        }
-        
-        // --- LA MAGIA PER LA TRASPARENZA ---
-        startButton.setContentAreaFilled(false); // Rimuove il "riempimento" grigio di default
-        startButton.setBorderPainted(false);     // Rimuove il bordo 3D attorno al bottone
-        startButton.setOpaque(false);            // Si assicura che il pannello sotto sia visibile
-        
-        // Estetica extra (le righe che avevi commentato)
-        startButton.setFocusPainted(false);      // Rimuove il quadratino tratteggiato quando lo clicchi
-        startButton.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Fa apparire la "manina" del mouse
-        
-        // Il comando che il Controller dovrà ascoltare
+        startButton.setContentAreaFilled(false);
+        startButton.setBorderPainted(false);
+        startButton.setOpaque(false);
+        startButton.setFocusPainted(false);
+        startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         startButton.setActionCommand("START");
 
         menuPanel.add(startButton);
@@ -174,11 +148,8 @@ public class SwingView implements IView{
     @Override
     public void switchToGame() {
         cardLayout.show(mainContainer, "GAME");
-        gamePanel.requestFocusInWindow();
-
         mainContainer.revalidate();
         mainContainer.repaint();
-        
         gamePanel.requestFocusInWindow();
     }
     
@@ -188,10 +159,8 @@ public class SwingView implements IView{
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
         button.setVisible(false);
-        
         button.setHorizontalTextPosition(SwingConstants.CENTER);
         button.setVerticalTextPosition(SwingConstants.CENTER);
-        
         button.setForeground(Color.WHITE);
         button.setFont(new Font("Arial", Font.BOLD, 14));
         return button;
@@ -200,188 +169,173 @@ public class SwingView implements IView{
     @Override
     public void render(IModel model) {
         this.model = model;
-        // Diciamo al pannello di ridisegnarsi (chiamerà paintComponent)
         gamePanel.repaint(); 
     }
 
     @Override
     public void showMessage(String message) {
-        // Mostriamo i messaggi importanti (es. Oro insufficiente) come popup
         JOptionPane.showMessageDialog(frame, message);
     }
     
     public JPanel getGamePanel() { return gamePanel; }
+    
+    private BufferedImage loadImage(String path) {
+            try {
+                return ImageIO.read(getClass().getResourceAsStream(path));
+            } catch (Exception e) {
+                System.err.println("Impossibile caricare asset: " + path);
+                return null; // Restituisce null per innescare i blocchi di fallback
+            }
+        }
 
-    // --- Pannello interno per il disegno custom ---
     private class GamePanel extends JPanel {
         
-    	private Map<Integer, BufferedImage[]> towerAssets;
-    	private BufferedImage background;
-    	private BufferedImage lifespan;
-    	private BufferedImage redBar;
-    	private BufferedImage archerIcon;
-    	private BufferedImage mageIcon;
-    	private BufferedImage barrackIcon;
-    	private BufferedImage cannonIcon;
-    	private Map<Integer, BufferedImage> projectileAssets;
-    	private Map<Integer,BufferedImage[]> enemyAssets;
-    	private BufferedImage[] soldierFrames = new BufferedImage[20];
+    	
+    	private Map<Integer, BufferedImage[]> towerAssets = new HashMap<>();
+        private Map<Integer, BufferedImage> projectileAssets = new HashMap<>();
+        private Map<Integer, BufferedImage[]> enemyAssets = new HashMap<>();
+        private BufferedImage background, backgroundTop, lifespan, redBar;
+        private BufferedImage hoveredSlot;
+        private BufferedImage[] soldierFrames = new BufferedImage[20];
     	
     	
         public GamePanel() {
         	
-        	
+        	this.setPreferredSize(new Dimension(1056,864 ));
             setBackground(Color.BLUE); // Un bel verde erba
             loadAssets();
         }
         
+        
+        
         private void loadAssets() {
-        	towerAssets = new HashMap();
-        	projectileAssets = new  HashMap();
-        	enemyAssets = new HashMap();
-        	try {
-        		archerIcon = ImageIO.read(getClass().getResourceAsStream("/assets/background/75_2.png"));
-        		mageIcon = ImageIO.read(getClass().getResourceAsStream("/assets/background/100_9.png"));
-        		cannonIcon = ImageIO.read(getClass().getResourceAsStream("/assets/background/125_9.png"));
-        		barrackIcon = ImageIO.read(getClass().getResourceAsStream("/assets/background/75-1_9.png"));
-        	}catch(IOException e){
-        		e.printStackTrace();
-        	}
-        	ImageIcon aIcon = new ImageIcon(archerIcon);
-        	ImageIcon mIcon = new ImageIcon(mageIcon);
-        	ImageIcon bIcon = new ImageIcon(barrackIcon);
-        	ImageIcon cIcon = new ImageIcon(cannonIcon);
-        	
-        	archerButton.setIcon(aIcon);
-        	mageButton.setIcon(mIcon);
-        	cannonButton.setIcon(cIcon);
-        	barracksButton.setIcon(bIcon);
-        	try {
-        		
-        		BufferedImage[] archerTower = new BufferedImage[3];
-        		BufferedImage[] mageTower = new BufferedImage[3];
-        		BufferedImage[] cannonTower = new BufferedImage[3];
-        		BufferedImage[] barrackTower = new BufferedImage[3];
-        		archerTower[0] = ImageIO.read(getClass().getResourceAsStream("/assets/ARCHER_TOWER/7.png"));
-        		archerTower[1] = ImageIO.read(getClass().getResourceAsStream("/assets/ARCHER_TOWER/8.png"));
-        		archerTower[2] = ImageIO.read(getClass().getResourceAsStream("/assets/ARCHER_TOWER/9.png"));
-        		mageTower[0] = ImageIO.read(getClass().getResourceAsStream("/assets/MAGE_TOWER/11.png"));
-        		mageTower[1] = ImageIO.read(getClass().getResourceAsStream("/assets/MAGE_TOWER/12.png"));
-        		mageTower[2] = ImageIO.read(getClass().getResourceAsStream("/assets/MAGE_TOWER/13.png"));
-        		cannonTower[0] = ImageIO.read(getClass().getResourceAsStream("/assets/CANNON_TOWER/15.png"));
-        		cannonTower[1] = ImageIO.read(getClass().getResourceAsStream("/assets/CANNON_TOWER/16.png"));
-        		cannonTower[2] = ImageIO.read(getClass().getResourceAsStream("/assets/CANNON_TOWER/17.png"));
-        		barrackTower[0] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/7.png"));
-        		barrackTower[1] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/8.png"));
-        		barrackTower[2] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/9.png"));
-        		background = ImageIO.read(getClass().getResourceAsStream("/assets/background/game_background_1.jpg"));
-        		towerAssets.put(Tower.MAGE_TYPE, mageTower);
-        		towerAssets.put(Tower.ARCHER_TYPE, archerTower);
-        		towerAssets.put(Tower.CANNON_TYPE,cannonTower);
-                towerAssets.put(Tower.BARRACKS_TYPE, barrackTower);
-        		projectileAssets.put(Projectile.ARCHER_PROJECTILE, ImageIO.read(getClass().getResourceAsStream("/assets/ARCHER_TOWER/37.png")));
-        		projectileAssets.put(Projectile.MAGE_PROJECTILE, ImageIO.read(getClass().getResourceAsStream("/assets/MAGE_TOWER/10.png")));
-        		projectileAssets.put(Projectile.CANNON_PROJECTILE, ImageIO.read(getClass().getResourceAsStream("/assets/CANNON_TOWER/29.png")));
-        	
-        		lifespan = ImageIO.read(getClass().getResourceAsStream("/assets/HEALTHBAR/health_bar-05.png"));
-        		redBar = ImageIO.read(getClass().getResourceAsStream("/assets/HEALTHBAR/health_bar-04.png"));
-        		soldierFrames[0] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_000.png"));
-        		soldierFrames[1] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_001.png"));
-        		soldierFrames[2] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_002.png"));
-        		soldierFrames[3] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_003.png"));
-        		soldierFrames[4] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_004.png"));
-        		soldierFrames[5] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_005.png"));
-        		soldierFrames[6] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_006.png"));
-        		soldierFrames[7] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_007.png"));
-        		soldierFrames[8] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_008.png"));
-        		soldierFrames[9] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_009.png"));
-        		soldierFrames[10] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_010.png"));
-        		soldierFrames[11] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_011.png"));
-        		soldierFrames[12] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_012.png"));
-        		soldierFrames[13] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_013.png"));
-        		soldierFrames[14] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_014.png"));
-        		soldierFrames[15] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_015.png"));
-        		soldierFrames[16] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_016.png"));
-        		soldierFrames[17] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_017.png"));
-        		soldierFrames[18] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_018.png"));
-        		soldierFrames[19] = ImageIO.read(getClass().getResourceAsStream("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_019.png"));
-        		BufferedImage[] goblinFrames = new BufferedImage[15];
-        		BufferedImage[] orcFrames = new BufferedImage[10];
-        		BufferedImage[] scorpionFrames = new BufferedImage[10];
-        		orcFrames[0] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_001.png"));
-        		orcFrames[2] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_003.png"));
-        		orcFrames[3] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_004.png"));
-        		orcFrames[4] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_005.png"));
-        		orcFrames[5] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_006.png"));
-        		orcFrames[6] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_007.png"));
-        		orcFrames[7] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_008.png"));
-        		orcFrames[8] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_009.png"));
-        		orcFrames[9] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_010.png"));
-        		orcFrames[1] = ImageIO.read(getClass().getResourceAsStream("/assets/ORC/5_enemies_1_walk_002.png"));
-        		scorpionFrames[0] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_001.png"));
-        		scorpionFrames[1] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_002.png"));
-        		scorpionFrames[2] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_003.png"));
-        		scorpionFrames[3] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_004.png"));
-        		scorpionFrames[4] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_005.png"));
-        		scorpionFrames[5] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_006.png"));
-        		scorpionFrames[6] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_007.png"));
-        		scorpionFrames[7] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_008.png"));
-        		scorpionFrames[8] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_009.png"));
-        		scorpionFrames[9] = ImageIO.read(getClass().getResourceAsStream("/assets/SCORPION/1_enemies_1_walk_010.png"));
-        		goblinFrames[0] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_001.png"));
-        		goblinFrames[1] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_002.png"));
-        		goblinFrames[2] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_003.png"));
-        		goblinFrames[3] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_004.png"));
-        		goblinFrames[4] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_005.png"));
-        		goblinFrames[5] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_006.png"));
-        		goblinFrames[6] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_007.png"));
-        		goblinFrames[7] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_008.png"));
-        		goblinFrames[8] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_009.png"));
-        		goblinFrames[9] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_010.png"));
-        		goblinFrames[10] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_011.png"));
-        		goblinFrames[11] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_012.png"));
-        		goblinFrames[12] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_013.png"));
-        		goblinFrames[13] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_014.png"));
-        		goblinFrames[14] = ImageIO.read(getClass().getResourceAsStream("/assets/GOBLIN/3_enemies_1_walk_015.png"));
-        		
-        		enemyAssets.put(Enemy.GOBLIN_TYPE, goblinFrames);
-        		enemyAssets.put(Enemy.SCORPION_TYPE, scorpionFrames);
-        		enemyAssets.put(Enemy.ORC_TYPE, orcFrames);
-        	}catch(IOException e ) {
-        		e.printStackTrace();
-                System.err.println("Errore caricamento asset grafici!");
-        	}
-        	
-        	try {
-        		java.io.InputStream is = getClass().getResourceAsStream("/assets/background/Grandover.ttf");
+            // Icone dei bottoni
+            archerButton.setIcon(new ImageIcon(loadImage("/assets/background/75_2.png")));
+            mageButton.setIcon(new ImageIcon(loadImage("/assets/background/100_9.png")));
+            cannonButton.setIcon(new ImageIcon(loadImage("/assets/background/125_9.png")));
+            barracksButton.setIcon(new ImageIcon(loadImage("/assets/background/75-1_9.png")));
+            
+            // Torri
+            towerAssets.put(Tower.ARCHER_TYPE, new BufferedImage[]{
+                loadImage("/assets/ARCHER_TOWER/7.png"), loadImage("/assets/ARCHER_TOWER/8.png"), loadImage("/assets/ARCHER_TOWER/9.png")
+            });
+            towerAssets.put(Tower.MAGE_TYPE, new BufferedImage[]{
+                loadImage("/assets/MAGE_TOWER/11.png"), loadImage("/assets/MAGE_TOWER/12.png"), loadImage("/assets/MAGE_TOWER/13.png")
+            });
+            towerAssets.put(Tower.CANNON_TYPE, new BufferedImage[]{
+                loadImage("/assets/CANNON_TOWER/15.png"), loadImage("/assets/CANNON_TOWER/16.png"), loadImage("/assets/CANNON_TOWER/17.png")
+            });
+            towerAssets.put(Tower.BARRACKS_TYPE, new BufferedImage[]{
+                loadImage("/assets/BARRACK_TOWER/7.png"), loadImage("/assets/BARRACK_TOWER/8.png"), loadImage("/assets/BARRACK_TOWER/9.png")
+            });
+            
+            // Proiettili, Sfondo e Barre
+            background = loadImage("/assets/background/tail_6.png");
+            backgroundTop = loadImage("/assets/background/tail_6_2.png");
+            projectileAssets.put(Projectile.ARCHER_PROJECTILE, loadImage("/assets/ARCHER_TOWER/37.png"));
+            projectileAssets.put(Projectile.MAGE_PROJECTILE, loadImage("/assets/MAGE_TOWER/10.png"));
+            projectileAssets.put(Projectile.CANNON_PROJECTILE, loadImage("/assets/CANNON_TOWER/29.png"));
+            lifespan = loadImage("/assets/HEALTHBAR/health_bar-05.png");
+            redBar = loadImage("/assets/HEALTHBAR/health_bar-04.png");
+            hoveredSlot = loadImage("/assets/background/39.png");
+
+            // --- ANIMAZIONI: CARICAMENTO SMART CON CICLI FOR ---
+            
+            // Soldati (000 a 019)
+            for (int i = 0; i < 20; i++) {
+                soldierFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_%03d.png", i));
+            }
+            
+            // Orchi (001 a 010)
+            BufferedImage[] orcFrames = new BufferedImage[10];
+            for (int i = 0; i < 10; i++) {
+                orcFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_walk_%03d.png", i + 1));
+            }
+            enemyAssets.put(Enemy.ORC_TYPE, orcFrames);
+            
+            // Scorpioni (001 a 010)
+            BufferedImage[] scorpionFrames = new BufferedImage[10];
+            for (int i = 0; i < 10; i++) {
+                scorpionFrames[i] = loadImage(String.format("/assets/SCORPION/1_enemies_1_walk_%03d.png", i + 1));
+            }
+            enemyAssets.put(Enemy.SCORPION_TYPE, scorpionFrames);
+            
+            // Goblin (001 a 015)
+            BufferedImage[] goblinFrames = new BufferedImage[15];
+            for (int i = 0; i < 15; i++) {
+                goblinFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_walk_%03d.png", i + 1));
+            }
+            enemyAssets.put(Enemy.GOBLIN_TYPE, goblinFrames);
+
+            // Caricamento Font
+            try {
+                java.io.InputStream is = getClass().getResourceAsStream("/assets/background/Grandover.ttf");
                 font = Font.createFont(Font.TRUETYPE_FONT, is);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
                 mainFont = font.deriveFont(20f);
                 winLoseFont = font.deriveFont(60f);
-            
-                GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-                ge.registerFont(font);
-                } catch (IOException | FontFormatException e) {
+            } catch (Exception e) {
                 mainFont = new Font("Arial", Font.BOLD, 18);
                 font = new Font("Arial", Font.BOLD, 50);
-                }
+                winLoseFont = new Font("Arial", Font.BOLD, 60);
+            }
         }
 
         @Override
         protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
+        	super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
-            // Attiviamo l'anti-aliasing per bordi più morbidi
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-            if (model == null) return;
-            g2d.drawImage(background,0,0,getWidth() ,getHeight(),null);
-          
-            drawSlots(g2d);
+            // 1. Calcoliamo la scala elastica in base alla dimensione attuale dello schermo
+            // 1408 e 1152 sono le coordinate "logiche" intoccabili della tua mappa
+            scaleX = getWidth() / 1056.0;
+            scaleY = getHeight() / 864.0;
+
+            // Salviamo il pennello originale
+            AffineTransform oldTransform = g2d.getTransform();
+
+            // 2. STIRIAMO IL PENNELLO!
+            g2d.scale(scaleX, scaleY);
+
+            // =================================================================
+            // DA QUI IN POI, DISEGNI TUTTO ESATTAMENTE COME HAI SEMPRE FATTO!
+            // Usa le coordinate normali, Java le rimpicciolirà/ingrandirà da solo
+            // =================================================================
+
+            if (background != null) {
+                g2d.drawImage(background, 0, 0, 1056, 864, null); 
+            }
+            
+            
             drawEnemies(g2d);
-            drawProjectiles(g2d);
-            updateMenuButton();         
             drawSoldiers(g2d);
+            drawProjectiles(g2d);
+            
+            
+            if (backgroundTop != null) {
+                g2d.drawImage(backgroundTop, 0, 0, 1056, 864, null); 
+            }
+            // Ripristiniamo il pennello PRIMA di disegnare la UI o aggiornare i bottoni
+            
+            drawSlots(g2d);
+            
+            g2d.setTransform(oldTransform);
+            
+            
+            
+            // Disegniamo la UI (testi, vite) SENZA scala, così i font restano nitidi
             drawUI(g2d);
+            
+            // Aggiorniamo la posizione dei bottoni
+            updateMenuButton();
+        }
+        
+        private void drawShadowText(Graphics2D g, String text, int x, int y, Color color, int shadowOffset) {
+            g.setColor(Color.BLACK);
+            g.drawString(text, x + shadowOffset, y + shadowOffset); 
+            g.setColor(color);
+            g.drawString(text, x, y);
         }
 
         private void drawTextMenu(Graphics2D g, String text, int x, int y, Color color) {
@@ -400,291 +354,219 @@ public class SwingView implements IView{
 
         private void drawSlots(Graphics2D g) {
             for (TowerSlot slot : model.getAvailableSlots()) {
-            	if (slot.isOccupied()) {
+                
+                // Calcoliamo il VERO centro della piazzola per centrare torri e cerchi
+                int cx = slot.getX() + (slot.getWidth() / 2);
+                int cy = slot.getY() + (slot.getHeight() / 2);
+
+                if (slot.isOccupied()) {
                     Tower tower = slot.getTower();
-                    
-                    // 1. Peschiamo l'INTERO ARRAY di quella torre dalla mappa
                     BufferedImage[] levelsArray = towerAssets.get(tower.getType());
-                    
-                    // 2. Troviamo l'indice corretto (Livello 1 -> Indice 0)
                     int imageIndex = tower.getLvl() - 1;
                     
-                    // 3. Controlliamo che l'array esista e che l'indice non sbordi!
                     if (levelsArray != null && imageIndex < levelsArray.length && levelsArray[imageIndex] != null) {
-                        
-                        BufferedImage img = levelsArray[imageIndex];
-                        g.drawImage(img, slot.getX() - 54, slot.getY() - 68, 120, 110, null);
-                        
+                        // Usiamo cx e cy al posto di getX e getY per mantenere le torri centrate!
+                        g.drawImage(levelsArray[imageIndex], cx - 27, cy - 55, 60, 70, null);
                     } else {
-                        // FALLBACK: Se manca l'immagine di quel livello, disegniamo i blocchi colorati
-                        if (tower.getType() == Tower.ARCHER_TYPE) {
-                            g.setColor(new Color(34, 139, 34)); 
-                            g.fill3DRect(slot.getX() - 25, slot.getY() - 25, 50, 50, true);
-                        } else if (tower.getType() == Tower.MAGE_TYPE) {
-                            g.setColor(new Color(128, 0, 128));
-                            g.fill3DRect(slot.getX() - 25, slot.getY() - 25, 50, 50, true);
-                        }
-                        // Aggiungiamo un testo per capire il livello anche senza grafica!
+                        // Fallback Torri
+                        if (tower.getType() == Tower.ARCHER_TYPE) g.setColor(new Color(34, 139, 34)); 
+                        else g.setColor(new Color(128, 0, 128));
+                        g.fill3DRect(cx - 25, cy - 25, 50, 50, true);
                         g.setColor(Color.WHITE);
-                        g.drawString("Lvl " + tower.getLvl(), slot.getX() - 10, slot.getY());
+                        g.drawString("Lvl " + tower.getLvl(), cx - 10, cy);
                     } 
-                }else {
-                    	g.setColor(new Color(0,0,0,0));
-                    	g.fillRect(slot.getX() - 15, slot.getY() - 15, 30, 30);
-                	}
+                } else if (slot == model.getHoveredSlot()) {
+                    
+                    // LA TUA NUOVA IMMAGINE HOVER!
+                    if (hoveredSlot != null) {
+                        // Disegna il png perfettamente sopra il rettangolo di Tiled
+                        g.drawImage(hoveredSlot, slot.getX(), slot.getY(), slot.getWidth(), slot.getHeight(), null);
+                    } else {
+                        // Fallback di emergenza
+                        g.setColor(new Color(255, 215, 0, 70)); 
+                        g.fillRect(slot.getX(), slot.getY(), slot.getWidth(), slot.getHeight());
+                    }
+                }
             }
             
+            // Logica dei Cerchi del Range
             TowerSlot slotToHighlight = null;
             TowerSlot selectedSlot = model.getSelectedBuildSlot();
             
-            
-            if(selectedSlot != null && selectedSlot.isOccupied()) {
-            	int x = selectedSlot.getX();
-            	int y = selectedSlot.getY();
-            	int range = selectedSlot.getTower().getRange();
-            	
-            	 g.setColor(new Color(255, 255, 255, 30)); 
-                 g.fillOval(x - range, y - range, range * 2, range * 2);
-                 
-                 g.setColor(new Color(255, 255, 255, 100));
-                 g.drawOval(x - range, y - range, range * 2, range * 2);
-            	
-            	
-            }
-            
-            // CASO A: Il giocatore ha cliccato la Caserma (il menu è aperto)
-            if (selectedSlot != null && selectedSlot.isOccupied() && selectedSlot.getTower().getType() == Tower.BARRACKS_TYPE) {
-                slotToHighlight = selectedSlot;
-            } 
-            // CASO B: Il menu è chiuso, ma stiamo piazzando la bandierina!
-            else if (model.isSettingRallyPoint()) {
+            if (selectedSlot != null && selectedSlot.isOccupied()) {
+                // Ricalcoliamo il centro per far partire il cerchio dal cuore della torre
+                int cx = selectedSlot.getX() + (selectedSlot.getWidth() / 2);
+                int cy = selectedSlot.getY() + (selectedSlot.getHeight() / 2);
+                int r = selectedSlot.getTower().getRange();
+                
+                g.setColor(new Color(255, 255, 255, 30)); 
+                g.fillOval(cx - r, cy - r, r * 2, r * 2);
+                g.setColor(new Color(255, 255, 255, 100));
+                g.drawOval(cx - r, cy - r, r * 2, r * 2);
+                
+                if (selectedSlot.getTower().getType() == Tower.BARRACKS_TYPE) slotToHighlight = selectedSlot;
+            } else if (model.isSettingRallyPoint()) {
                 slotToHighlight = model.getActiveBarracksSlot();
             }
 
-            // SE ABBIAMO UNO SLOT VALIDO, DISEGNIAMO IL CERCHIO!
             if (slotToHighlight != null) {
-                int x = slotToHighlight.getX();
-                int y = slotToHighlight.getY();
-                int range = slotToHighlight.getTower().getRange(); 
+                int cx = slotToHighlight.getX() + (slotToHighlight.getWidth() / 2);
+                int cy = slotToHighlight.getY() + (slotToHighlight.getHeight() / 2);
+                int r = slotToHighlight.getTower().getRange(); 
                 
-                // Area blu semitrasparente
                 g.setColor(new Color(0, 0, 255, 30)); 
-                g.fillOval(x - range, y - range, range * 2, range * 2);
-                
-                // Bordino bianco per dare l'idea del "limite"
+                g.fillOval(cx - r, cy - r, r * 2, r * 2);
                 g.setColor(new Color(255, 255, 255, 100));
-                g.drawOval(x - range, y - range, range * 2, range * 2);
+                g.drawOval(cx - r, cy - r, r * 2, r * 2);
             }
         }
         
         private void updateMenuButton() {
-        	TowerSlot slot = model.getSelectedBuildSlot();
-        	
-        	if(slot==null) {
-        		archerButton.setVisible(false);
-        		mageButton.setVisible(false);
-        		cannonButton.setVisible(false);
-        		barracksButton.setVisible(false);
-        		rallyButton.setVisible(false);
-        		upgradeButton.setVisible(false);
-        	} else {
-        		
-        		if(!slot.isOccupied()) {
-        			int x = slot.getX() ;
-        			int y = slot.getY() ;
-        		
-        			int w = 85;
-        			int h = 70;
-        		
-        			archerButton.setBounds(x - w - 15, y - h - 15, w, h);
-        			mageButton.setBounds(x + 15, y - h - 15, w, h);  
-        			cannonButton.setBounds(x - w - 15, y + 15, w, h); 
-        			barracksButton.setBounds(x + 15, y + 15, w, h);
+            TowerSlot slot = model.getSelectedBuildSlot();
+            
+            // Nascondiamo tutto di default
+            archerButton.setVisible(false);
+            mageButton.setVisible(false);
+            cannonButton.setVisible(false);
+            barracksButton.setVisible(false);
+            rallyButton.setVisible(false);
+            upgradeButton.setVisible(false);
+            
+            if (slot == null) return;
+            
+            int x = (int) (slot.getX() * scaleX); // Moltiplica per la scala!
+            int y = (int) (slot.getY() * scaleY); // Moltiplica per la scala!
+
+            if (!slot.isOccupied()) {
+                // Scaliamo anche la grandezza dei bottoni
+                int w = (int) (85 * scaleX);
+                int h = (int) (70 * scaleY);
                 
-        			archerButton.setVisible(true);
-        			mageButton.setVisible(true);
-        			cannonButton.setVisible(true);
-        			barracksButton.setVisible(true);
-        		} else {
-        			
-        			Tower tower = slot.getTower();
-        			
-        			if(tower.getType()==Tower.BARRACKS_TYPE) {
-        				int x = slot.getX();
-        				int y = slot.getY();
-        				rallyButton.setBounds(x -15, y + 40, 30, 30);
-        				rallyButton.setVisible(true);
-        			}
-        			
-        			if (tower.canUpgrade()) {
-        				
-        				int x = slot.getX() ;
-            			int y = slot.getY() ;
-            			
-                        upgradeButton.setBounds(x - 45, y - 60, 90, 30);
-                        
-                        // Scriviamo il costo direttamente sul bottone!
-                        upgradeButton.setText("UP: " + tower.getUpgradeCost() + "g");
-                        
-                        // Se non hai abbastanza soldi, lo facciamo diventare rosso/grigio
-                        if (model.getGold() < tower.getUpgradeCost()) {
-                            upgradeButton.setBackground(new Color(255, 0, 0, 150)); // Rosso
-                        } else {
-                            upgradeButton.setBackground(new Color(255, 215, 0, 200)); // Oro
-                        }
-                        
-                        upgradeButton.setVisible(true);
-                    }
-        		}
-        	}
+                archerButton.setBounds(x - w - (int)(15*scaleX), y - h - (int)(15*scaleY), w, h);
+                mageButton.setBounds(x + (int)(15*scaleX), y - h - (int)(15*scaleY), w, h);
+                cannonButton.setBounds(x - w - (int)(15*scaleX), y + (int)(15*scaleY), w, h);
+                barracksButton.setBounds(x + (int)(15*scaleX), y + (int)(15*scaleY), w, h);
+                
+                archerButton.setVisible(true);
+                mageButton.setVisible(true);
+                cannonButton.setVisible(true);
+                barracksButton.setVisible(true);
+            } else {
+                Tower tower = slot.getTower();
+                
+                if (tower.getType() == Tower.BARRACKS_TYPE) {
+                    rallyButton.setBounds(x - 15, y + 40, 30, 30);
+                    rallyButton.setVisible(true);
+                }
+                
+                if (tower.canUpgrade()) {
+                    upgradeButton.setBounds(x - 45, y - 60, 90, 30);
+                    upgradeButton.setText("UP: " + tower.getUpgradeCost() + "g");
+                    upgradeButton.setBackground(model.getGold() < tower.getUpgradeCost() ? 
+                        new Color(255, 0, 0, 150) : new Color(255, 215, 0, 200));
+                    upgradeButton.setVisible(true);
+                }
+            }
         }
         
         private void drawProjectiles(Graphics2D g) {
-        	for(Projectile p : model.getActiveProjectiles()) {
-        		g.setColor(Color.BLACK);
-        		int px = (int) p.getX();
-        		int py = (int) p.getY();
-        			BufferedImage img = projectileAssets.get(p.getType());
-        			if(img != null) {
-                		AffineTransform oldTrasform = g.getTransform();
-                		g.translate(p.getX(),p.getY());
-                		g.rotate(p.getAngle());
-                		int width = 14;  
-                        int height = 8; 
-                        g.drawImage(img, -width / 2, -height / 2, width, height, null);
-                        g.setTransform(oldTrasform);
-                	}
-                	else {
-                		if(p.getType() == Tower.ARCHER_TYPE) {
-                			g.setColor(new Color(34, 139, 34)); 
-                        	g.fillOval(px - 25, py - 25, 50, 50);
-                		}else if (p.getType() == Tower.MAGE_TYPE) {
-                			g.setColor(new Color(128, 0, 128)); 
-                        	g.fillOval(px - 25, py - 25, 50, 50);
-                		
-        			
-                		}
-        		
-                	}
-        	}
+            for (Projectile p : model.getActiveProjectiles()) {
+                int px = (int) p.getX();
+                int py = (int) p.getY();
+                BufferedImage img = projectileAssets.get(p.getType());
+                
+                if (img != null) {
+                    AffineTransform oldTrasform = g.getTransform();
+                    g.translate(px, py);
+                    g.rotate(p.getAngle());
+                    g.drawImage(img, -7, -4, 14, 8, null);
+                    g.setTransform(oldTrasform);
+                } else {
+                    g.setColor(p.getType() == Tower.ARCHER_TYPE ? new Color(34, 139, 34) : new Color(128, 0, 128)); 
+                    g.fillOval(px - 25, py - 25, 50, 50);
+                }
+            }
         }
         
         private void drawSoldiers(Graphics2D g) {
-        	for(Soldier s : model.getActiveSoldier()) {
-        		
-        		g.setColor(new Color(0, 0, 0, 80)); 
-                g.fillOval((int)s.getX() - 20, (int)s.getY() + 15, 30, 10);
-        		
-        		if (s.isMoving() && soldierFrames != null && soldierFrames[0] != null) {
-                    // È in movimento! Calcoliamo il frame corretto
-                    // animationSpeed regola la velocità visiva (es. 2 = cambia frame ogni 2 tick)
-                    int animationSpeed = 2; 
-                    int frameIndex = (s.getTikCounter() / animationSpeed) % soldierFrames.length;
-                    
-                    BufferedImage currentFrame = soldierFrames[frameIndex];
-                    g.drawImage(currentFrame, (int)s.getX() - 24, (int)s.getY() - 24, 48, 48, null);
-
+            for (Soldier s : model.getActiveSoldier()) {
+                int sx = (int) s.getX();
+                int sy = (int) s.getY();
+                
+                g.setColor(new Color(0, 0, 0, 80)); // Ombra
+                g.fillOval(sx - 20, sy + 7, 14, 10);
+                
+                if (s.isMoving() && soldierFrames[0] != null) {
+                    int frameIndex = (s.getTikCounter() / 2) % soldierFrames.length;
+                    g.drawImage(soldierFrames[frameIndex], sx - 24, sy - 24, 30, 40, null);
                 } else if (soldierFrames[0] != null) {
-                    // È fermo! Disegniamo l'immagine statica di default
-        			g.drawImage(soldierFrames[0], (int)s.getX() - 24, (int)s.getY() - 24, 48, 48, null);
-                    
-        		} else {
-                    // Fallback di emergenza rosso se non carica le immagini
-        			g.setColor(Color.RED); 
-                    g.fillOval((int)s.getX() - 12, (int)s.getY() - 12, 24, 24);
-        		}
-        		
-        		int fullBarWidth = 25;
-            	double healthPercentage = (double) s.getHealth() / s.getMaxHealth();
-            	int currentBarWidth = (int) (fullBarWidth * healthPercentage); 
-            	
-            	
-            	int x = (int)s.getX() - 15;
-            	int y = (int)s.getY() - 25;
-            	
-            	int barHeight = 8;
-            	
-            	
-            	if(redBar != null) {
-            		g.drawImage(redBar, x, y, fullBarWidth, barHeight, null);
-            	}
-            	if(lifespan != null && currentBarWidth > 0) {
-            		int sourceCropWidth = (int) (lifespan.getWidth()*healthPercentage);
-            		int sourceImageHeight = lifespan.getHeight();
-            		g.drawImage(lifespan, 
-                            x, y, x + currentBarWidth, y + barHeight,  
-                            0, 0, sourceCropWidth, sourceImageHeight,  
-                            null);
-            	}
-        	}
+                    g.drawImage(soldierFrames[0], sx - 24, sy - 24, 30, 40, null);
+                } else {
+                    g.setColor(Color.RED); 
+                    g.fillOval(sx - 12, sy - 12, 24, 24);
+                }
+                
+                drawHealthBar(g, sx - 20, sy - 25, s.getHealth(), s.getMaxHealth());
+            }
         }
         		
         
 
         private void drawEnemies(Graphics2D g) {
-        	for (Enemy e : model.getActiveEnemies()) {
+            for (Enemy e : model.getActiveEnemies()) {
+                int ex = (int) e.getX();
+                int ey = (int) e.getY();
                 
-        		
-        		g.setColor(new Color(0, 0, 0, 80)); 
-                g.fillOval((int)e.getX() - 20, (int)e.getY() + 15, 30, 10);
-        		BufferedImage[] img = enemyAssets.get(e.getType());
-        		if (img != null && img.length > 0) {
-
-                    int animationSpeed = 1; 
-
-                    int frameIndex = (e.getTikCounter() / animationSpeed) % img.length;
-
-                    BufferedImage currentImage = img[frameIndex];
-                    g.drawImage(currentImage, (int)e.getX() - 24, (int)e.getY() - 24, 48, 48, null);
-                    
+                g.setColor(new Color(0, 0, 0, 80)); // Ombra
+                g.fillOval(ex - 11, ey + 9, 14, 10);
+                
+                BufferedImage[] frames = enemyAssets.get(e.getType());
+                if (frames != null && frames.length > 0) {
+                    int frameIndex = e.getTikCounter() % frames.length;
+                    g.drawImage(frames[frameIndex], ex - 18, ey - 18, 36, 36, null);
                 } else {
                     g.setColor(Color.RED); 
-                    g.fillOval((int)e.getX() - 12, (int)e.getY() - 12, 24, 24);
+                    g.fillOval(ex - 12, ey - 12, 24, 24);
                 }
                 
-                	int fullBarWidth = 25;
-                	double healthPercentage = (double) e.getHealth() / e.getMaxHealth();
-                	int currentBarWidth = (int) (fullBarWidth * healthPercentage); 
-                	
-                	
-                	int x = (int)e.getX() - 15;
-                	int y = (int)e.getY() - 25;
-                	
-                	int barHeight = 8;
-                	
-                	
-                	if(redBar != null) {
-                		g.drawImage(redBar, x, y, fullBarWidth, barHeight, null);
-                	}
-                	if(lifespan != null && currentBarWidth > 0) {
-                		int sourceCropWidth = (int) (lifespan.getWidth()*healthPercentage);
-                		int sourceImageHeight = lifespan.getHeight();
-                		g.drawImage(lifespan, 
-                                x, y, x + currentBarWidth, y + barHeight,               // Dove lo disegno a schermo
-                                0, 0, sourceCropWidth, sourceImageHeight,    // Che pezzo del file PNG prendo
-                                null);
-                	}
-                	
+                drawHealthBar(g, ex - 15, ey - 25, e.getHealth(), e.getMaxHealth());
+            }
+        }
+        
+        private void drawHealthBar(Graphics2D g, int x, int y, int currentHealth, int maxHealth) {
+            if (redBar == null || lifespan == null) return;
+            
+            int fullBarWidth = 13;
+            int barHeight = 5;
+            double healthPercentage = (double) currentHealth / maxHealth;
+            int currentBarWidth = (int) (fullBarWidth * healthPercentage); 
+            
+            g.drawImage(redBar, x, y, fullBarWidth, barHeight, null);
+            if (currentBarWidth > 0) {
+                int sourceCropWidth = (int) (lifespan.getWidth() * healthPercentage);
+                g.drawImage(lifespan, 
+                    x, y, x + currentBarWidth, y + barHeight,  
+                    0, 0, sourceCropWidth, lifespan.getHeight(), null);
             }
         }
         
         private void drawUI(Graphics2D g) {
             g.setFont(mainFont);
-            Color menu = new Color(236, 204, 120);
-            Color titolo =  new Color(75, 83, 32);
-            drawTextMenu(g, "VITE: " + model.getPlayerHealth(), 1160, 40, menu);
-            drawTextMenu(g, "ORO: " + model.getGold(), 1160, 70, menu);
+            Color menuColor = new Color(236, 204, 120);
+            Color titleColor = new Color(75, 83, 32);
+            
+            drawShadowText(g, "VITE: " + model.getPlayerHealth(), 1160, 40, menuColor, 5);
+            drawShadowText(g, "ORO: " + model.getGold(), 1160, 70, menuColor, 5);
+            
             int ondataMostrata = Math.min(model.getCurrentWaveNumber(), model.getTotalWaves());
-            drawTextMenu(g, "ONDATA: " + ondataMostrata + "/" + model.getTotalWaves(), 1160, 100, menu);
+            drawShadowText(g, "ONDATA: " + ondataMostrata + "/" + model.getTotalWaves(), 1160, 100, menuColor, 5);
             
             g.setFont(winLoseFont);
-
             if (model.getCurrentWaveNumber() > model.getTotalWaves() && model.getActiveEnemies().isEmpty()) {
-                drawBigMessage(g, "VITTORIA!", 520, 380, titolo);
+                drawShadowText(g, "VITTORIA!", 520, 380, titleColor, 8);
             }
-
             if (model.isGameOver()) {
-                drawBigMessage(g, "GAME OVER", 520, 380, titolo);
+                drawShadowText(g, "GAME OVER", 520, 380, titleColor, 8);
             }
         }
     }

@@ -28,11 +28,11 @@ public interface IModel {
 	
 	List<Enemy> getActiveEnemies();
 	
-	List<Point> getEnemyPath();
-	
 	List<Projectile> getActiveProjectiles();
 	
 	List<Soldier> getActiveSoldier();
+	
+	List<EnemyPath> getMapPaths();
 	
 	int getCurrentWaveNumber();
 	
@@ -45,6 +45,10 @@ public interface IModel {
 	void deselectBuildSlot();
 	
 	TowerSlot getActiveBarracksSlot();
+	
+	TowerSlot getHoveredSlot();
+	
+	void setHoveredSlot(TowerSlot slot);
 	
 	void upgradeSelectedTower();
 	

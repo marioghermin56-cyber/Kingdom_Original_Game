@@ -2,13 +2,15 @@ package gioco.model;
 
 public class TowerSlot {
 	
-	private int x;
-	private int y;
+	private int x, y;
+	private int width, height;
 	private Tower tower;
 	
-	public TowerSlot(int x, int y) {
+	public TowerSlot(int x, int y, int width, int height) {
 		this.x = x;
 		this.y = y;
+		this.width = width;
+		this.height = height;
 		this.tower = null;
 	}
 	
@@ -18,6 +20,14 @@ public class TowerSlot {
 	
 	public int getY() {
 		return y;
+	}
+	
+	public int getWidth() {
+		return this.width;
+	}
+	
+	public int getHeight() {
+		return this.height;
 	}
 	
 	public boolean isOccupied() {
