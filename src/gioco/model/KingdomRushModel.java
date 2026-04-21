@@ -34,9 +34,9 @@ public class KingdomRushModel implements IModel{
 		this.slots = MapLoader.loadSlotsFromTMX("/assets/maps/tail_6.tmx");
 		
 		
-		waves.add(new Wave(10,25,Enemy.GOBLIN_TYPE));
-		waves.add(new Wave(6,15,Enemy.SCORPION_TYPE));
-		waves.add(new Wave(3,30,Enemy.ORC_TYPE));
+		waves.add(new Wave(10,70,Enemy.GOBLIN_TYPE));
+		waves.add(new Wave(6,40,Enemy.SCORPION_TYPE));
+		waves.add(new Wave(3,90,Enemy.ORC_TYPE));
 	}
 	
 	@Override

@@ -7,7 +7,6 @@ import gioco.model.IModel;
 public interface IView {
 
 	void render(IModel model);
-	
 	void showMessage(String message);
 	double getScaleX();
 	double getScaleY();
