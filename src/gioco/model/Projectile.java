@@ -3,8 +3,9 @@ package gioco.model;
 
 public class Projectile {
 
-	private double x;
-	private double y;
+	private double x, y;
+	private double startX, startY;
+	private double totalDistance;
 	private double projectileSpeed;
 	private int damage;
 	private Enemy target;
@@ -13,6 +14,7 @@ public class Projectile {
 	public static final int ARCHER_PROJECTILE = 1;
 	public static final int MAGE_PROJECTILE = 2;
 	public static final int CANNON_PROJECTILE = 3;
+	private double lastCalculatedAngle = 0.0;
 	
 	public Projectile(double x, double y, double projectileSpeed, int damage, Enemy target, int type ) {
 		this.x = x;
@@ -22,8 +24,20 @@ public class Projectile {
 		this.target = target;
 		this.type = type;
 		this.hit = false;
+		this.startX = x;
+		this.startY = y;
+		
+		this.totalDistance = Math.hypot(target.getX() - startX, target.getY() - startY);
 		
 		
+	}
+	
+	public double getDistanceTraveled() {
+        return Math.hypot(x - startX, y - startY);
+    }
+	
+	public double getTotalDistanceToTravel() {
+		return this.totalDistance;
 	}
 	
 	public double getX() {
@@ -40,9 +54,15 @@ public class Projectile {
 	
 	public double getAngle() {
 		if(target!=null) {
-			double distanceX = target.getX() - this.x;
-			double distanceY = target.getY() - this.y;
-			return Math.atan2(distanceY, distanceX);
+			double distanceX = target.getX() - this.x + 18;
+			double distanceY = target.getY() - this.y + 18;
+			double dist = Math.hypot(distanceX, distanceY - y);
+			if (dist > 10.0) {
+		        lastCalculatedAngle = Math.atan2(target.getY() - y + 18, target.getY() - x + 18);
+		    }
+		    
+		    // Ritorna l'angolo (se è vicinissimo, ritornerà l'ultimo angolo "sano" salvato!)
+		    return lastCalculatedAngle;
 		}
 		return 0;
 	}
@@ -57,12 +77,12 @@ public class Projectile {
 			return;
 		}
 		
-		double distanceX = this.x - target.getX();
-		double distanceY = this.y - target.getY();
+		double distanceX = target.getX() - this.x ;
+		double distanceY = target.getY() - this.y ;
 		double distanceFromEnemy = Math.hypot(distanceX, distanceY);
 		//double distanza = Math.sqrt(Math.pow(distanzaX,2) + Math.pow(distanzaY, 2));
 		
-		if(distanceFromEnemy < 3) {
+		if(distanceFromEnemy < this.projectileSpeed) {
 			target.takeDamage(damage);
 			hit = true;
 			return;
@@ -70,8 +90,8 @@ public class Projectile {
 		
 		double velX = (distanceX/distanceFromEnemy)*projectileSpeed;
 		double velY = (distanceY/distanceFromEnemy)*projectileSpeed;		
-		this.x -= velX;
-		this.y -= velY;
+		this.x += velX;
+		this.y += velY;
 			
 	}
 }

@@ -302,7 +302,13 @@ public class KingdomRushModel implements IModel{
 							if (!enemy.isDead() && !enemiesToRemove.contains(enemy)) {
 								double distance = Math.hypot(enemy.getX() - slot.getX(), enemy.getY() - slot.getY());
 								if (distance <= tower.getRange()) {
-									projectilesToAdd.add(new Projectile(slot.getX(), slot.getY(), 4.0, tower.getDamage(), enemy, tower.getType()));
+									if(tower.getType() == Tower.ARCHER_TYPE) {
+										projectilesToAdd.add(new Projectile(slot.getX() + 16, slot.getY() - 12, 3.0, tower.getDamage(), enemy, tower.getType()));
+									}else if(tower.getType()== tower.MAGE_TYPE) {
+										projectilesToAdd.add(new Projectile(slot.getX() + 16, slot.getY() + 4, 2.0, tower.getDamage(), enemy, tower.getType()));
+									}else if(tower.getType() == tower.CANNON_TYPE) {
+										projectilesToAdd.add(new Projectile(slot.getX() + 16, slot.getY() + 16, 1.5, tower.getDamage(), enemy, tower.getType()));
+									}
 									tower.resetCooldown();
 									break;
 								}

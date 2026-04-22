@@ -247,8 +247,8 @@ public class SwingView implements IView{
             }
             
             // Orchi (001 a 010)
-            BufferedImage[] orcFrames = new BufferedImage[10];
-            for (int i = 0; i < 10; i++) {
+            BufferedImage[] orcFrames = new BufferedImage[19];
+            for (int i = 0; i < 19; i++) {
                 orcFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_walk_%03d.png", i + 1));
             }
             enemyAssets.put(Enemy.ORC_TYPE, orcFrames);
@@ -310,7 +310,7 @@ public class SwingView implements IView{
             
             drawEnemies(g2d);
             drawSoldiers(g2d);
-            drawProjectiles(g2d);
+            
             
             
             if (backgroundTop != null) {
@@ -319,7 +319,7 @@ public class SwingView implements IView{
             // Ripristiniamo il pennello PRIMA di disegnare la UI o aggiornare i bottoni
             
             drawSlots(g2d);
-            
+            drawProjectiles(g2d);
             g2d.setTransform(oldTransform);
             
             
@@ -439,8 +439,8 @@ public class SwingView implements IView{
 
             if (!slot.isOccupied()) {
                 // Scaliamo anche la grandezza dei bottoni
-                int w = (int) (85 * scaleX);
-                int h = (int) (70 * scaleY);
+                int w = (int) (200 * scaleX);
+                int h = (int) (200 * scaleY);
                 
                 archerButton.setBounds(x - w - (int)(15*scaleX), y - h - (int)(15*scaleY), w, h);
                 mageButton.setBounds(x + (int)(15*scaleX), y - h - (int)(15*scaleY), w, h);
@@ -470,22 +470,68 @@ public class SwingView implements IView{
         }
         
         private void drawProjectiles(Graphics2D g) {
-            for (Projectile p : model.getActiveProjectiles()) {
-                int px = (int) p.getX();
-                int py = (int) p.getY();
-                BufferedImage img = projectileAssets.get(p.getType());
-                
-                if (img != null) {
-                    AffineTransform oldTrasform = g.getTransform();
-                    g.translate(px, py);
-                    g.rotate(p.getAngle());
-                    g.drawImage(img, -7, -4, 14, 8, null);
-                    g.setTransform(oldTrasform);
-                } else {
-                    g.setColor(p.getType() == Tower.ARCHER_TYPE ? new Color(34, 139, 34) : new Color(128, 0, 128)); 
-                    g.fillOval(px - 25, py - 25, 50, 50);
-                }
-            }
+        	
+
+        	
+        	
+        	
+
+        	for (Projectile p : model.getActiveProjectiles()) {
+        		
+        		double visualTilt = Math.toRadians(70); 
+        		double maxArcHeight;
+        		
+        		if(p.getType() == Projectile.ARCHER_PROJECTILE) {
+        			maxArcHeight = 60.0;
+        		} else if(p.getType() == Projectile.MAGE_PROJECTILE) {
+        			maxArcHeight = 20.0;
+        		} else if(p.getType() == Projectile.CANNON_PROJECTILE) {
+        			maxArcHeight = 120.0;
+        		} else {
+        			maxArcHeight = 40.0;
+        		}
+        		
+        	    double lx = p.getX() ;
+        	    double ly = p.getY() ;
+
+
+        	    double totalDist = p.getTotalDistanceToTravel(); 
+        	    double distTraveled = p.getDistanceTraveled();
+
+        	    double progress = Math.min(1.0, distTraveled / totalDist);
+        	    if (Double.isNaN(progress)) progress = 1.0; 
+
+
+        	    double parabolaFactor = 4.0 * progress * (1.0 - progress);
+
+        	    double currentHeightOffset = maxArcHeight * parabolaFactor;
+
+        	    int vx = (int)lx;
+        	    int vy = (int)(ly - currentHeightOffset); 
+
+        	    double baseAngle = p.getAngle();
+        	    double tiltDirection = (Math.cos(baseAngle) >= 0) ? 1.0 : -1.0;
+    
+        	    double arcTilt = (1.0 - 2.0 * progress) * visualTilt*tiltDirection;
+        	    
+        	    double finalRenderAngle = baseAngle - arcTilt; 
+
+
+        	    BufferedImage img = projectileAssets.get(p.getType());
+
+        	    if (img != null) {
+        	        AffineTransform oldTransform = g.getTransform();
+        	        g.translate(vx, vy); 
+        	        g.rotate(finalRenderAngle);
+        	        g.drawImage(img, -14, -4, 14, 8, null); 
+        	        g.setTransform(oldTransform);
+        	    } else {
+        	        // Fallback drawing segue comunque la parabola
+        	        g.setColor(p.getType() == Tower.ARCHER_TYPE ? new Color(34, 139, 34) : new Color(128, 0, 128)); 
+        	        g.fillOval(vx - 5, vy - 5, 10, 10); // Più piccolo e centrato
+        	    }
+        	    
+        	}
         }
         
         private void drawSoldiers(Graphics2D g) {

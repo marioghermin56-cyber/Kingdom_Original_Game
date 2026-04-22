@@ -76,7 +76,35 @@ public class Tower {
 	}
 	
 	public int getDamage() {
+		if (this.type == ARCHER_TYPE) {
+            this.damage = 3;
+        } 
+        else if (this.type == MAGE_TYPE) {
+            this.damage = 5;
+        } 
+        else if (this.type == CANNON_TYPE) {
+            this.damage = 8;           
+        }
+        else if (this.type == BARRACKS_TYPE) {
+            this.damage = (int)(Math.random() * 4) + 2;
+        }
 		return this.damage;
+	}
+	
+	public int getCooldown() {
+		if (this.type == ARCHER_TYPE) {
+            this.cooldown = 45;
+        } 
+        else if (this.type == MAGE_TYPE) {
+            this.cooldown= 60;
+        } 
+        else if (this.type == CANNON_TYPE) {
+            this.cooldown = 90;           
+        }
+        else if (this.type == BARRACKS_TYPE) {
+            this.cooldown = 50;
+        }
+		return this.cooldown;
 	}
 	
 	public Point  getRallyPoint() {
@@ -100,7 +128,7 @@ public class Tower {
 	}
 	
 	public void resetCooldown() {
-		this.currentCooldown = cooldown;
+		this.currentCooldown = Tower.this.getCooldown();
 	}
 	
 	public void decreaseCooldown() {
