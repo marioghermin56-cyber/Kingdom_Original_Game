@@ -16,8 +16,9 @@ public class Wave {
 			this.pathIndex = pathIndex;
 		}
 	}
+	
 	private int spawnDelay;
-	private LinkedList<Integer> enemiesQueue;
+	private LinkedList<SpawnRequest> enemiesQueue;
 	
 	public Wave(int spawnDelay) {
 		this.enemiesQueue = new LinkedList<>();
@@ -25,11 +26,11 @@ public class Wave {
 		
 		}
 	
-	public void addEnemyGroup(int enemyType, int count) {
-		for (int i = 0; i < count; i++) {
-			enemiesQueue.add(enemyType);
-		}
-	}
+	public void addEnemyGroup(int enemyType, int count, int pathIndex) {
+        for (int i = 0; i < count; i++) {
+            enemiesQueue.add(new SpawnRequest(enemyType, pathIndex));
+        }
+    }
 	
 	public void shuffleEnemies() {
 		Collections.shuffle(enemiesQueue);
@@ -43,7 +44,7 @@ public class Wave {
 		return enemiesQueue.isEmpty();
 	}
 	
-	public int getNextEnemyType() {
+	public SpawnRequest getNextEnemyType() {
 		return enemiesQueue.poll(); 
 	}
 }
