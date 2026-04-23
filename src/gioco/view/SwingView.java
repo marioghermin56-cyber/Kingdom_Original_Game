@@ -11,14 +11,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SwingView implements IView{
-	private JFrame frame;
+public class SwingView implements IView {
+    private JFrame frame;
     private IModel model;
     private GamePanel gamePanel;
     
-    private JButton archerButton, mageButton, cannonButton, barracksButton, rallyButton, upgradeButton;
+    private JButton archerButton, mageButton, cannonButton, barracksButton, rallyButton, upgradeButton, musicButton, soundButton;
     private Font font, mainFont, winLoseFont;
+    
     private BufferedImage playIcon, menuImage;
+    private BufferedImage musicOnIcon, musicOffIcon, soundOnIcon, soundOffIcon;
     
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainContainer = new JPanel(cardLayout);
@@ -26,14 +28,13 @@ public class SwingView implements IView{
     private double scaleX = 1.0;
     private double scaleY = 1.0;
     
-    
     public SwingView() {
-    	frame = new JFrame("Pseudo Kingdom Rush - MVC Alpha");
+        frame = new JFrame("Pseudo Kingdom Rush - MVC Alpha");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(true); 
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 
-        // 1. PRIMA CREIAMO I BOTTONI! (Così esistono in memoria)
+        // 1. PRIMA CREIAMO I BOTTONI!
         archerButton = createTransparentButton();
         mageButton = createTransparentButton();
         barracksButton = createTransparentButton();
@@ -49,7 +50,6 @@ public class SwingView implements IView{
         upgradeButton.setBackground(new Color(255, 215, 0, 200));
 
         // 2. SOLO ORA CREIAMO IL PANNELLO!
-        // (Adesso quando loadAssets cercherà archerButton, lo troverà pronto!)
         gamePanel = new GamePanel();
         gamePanel.setLayout(null); 
 
@@ -61,8 +61,6 @@ public class SwingView implements IView{
         gamePanel.add(rallyButton);
         gamePanel.add(upgradeButton);
 
-        // ... (il resto del codice, initMenuPanel, CardLayout, ecc.) ...
-        
         initMenuPanel();
         mainContainer.add(menuPanel, "MENU");
         mainContainer.add(gamePanel, "GAME");
@@ -77,32 +75,88 @@ public class SwingView implements IView{
     
     @Override
     public void addUpgradeListener(ActionListener listener) {
-    	upgradeButton.addActionListener(listener);
+        upgradeButton.addActionListener(listener);
     }    
     
     @Override
     public void addArcherListener(ActionListener listener) {
-    	archerButton.addActionListener(listener);
-    };
+        archerButton.addActionListener(listener);
+    }
     @Override
     public void addMageListener(ActionListener listener) {
-    	mageButton.addActionListener(listener);
-    };
+        mageButton.addActionListener(listener);
+    }
     @Override
     public void addBarracksListener(ActionListener listener) {
-    	barracksButton.addActionListener(listener);
-    };
+        barracksButton.addActionListener(listener);
+    }
     @Override
     public void addCannonListener(ActionListener listener) {
-    	cannonButton.addActionListener(listener);
-    };
+        cannonButton.addActionListener(listener);
+    }
     @Override
     public void addRallyListener(ActionListener listener) {
         rallyButton.addActionListener(listener);
     }
+    @Override
+    public void addMusicListener(ActionListener listener) {
+        musicButton.addActionListener(listener);
+    }
+    @Override
+    public void addSoundListener(ActionListener listener) {
+        soundButton.addActionListener(listener);
+    }
+    public JPanel getGamePanel() {
+        return this.gamePanel;
+    }
+    
+    @Override
+    public void updateMusicIcon(boolean isMuted) {
+        if (isMuted) {
+            if (musicOffIcon != null) musicButton.setIcon(scaleIcon(musicOffIcon, 60, 60));
+            else musicButton.setText("MUSIC OFF");
+        } else {
+            if (musicOnIcon != null) musicButton.setIcon(scaleIcon(musicOnIcon, 60, 60));
+            else musicButton.setText("MUSIC ON");
+        }
+        musicButton.repaint();
+    }
+
+    @Override
+    public void updateSoundIcon(boolean isMuted) {
+        if (isMuted) {
+            if (soundOffIcon != null) soundButton.setIcon(scaleIcon(soundOffIcon, 60, 60));
+            else soundButton.setText("SOUND OFF");
+        } else {
+            if (soundOnIcon != null) soundButton.setIcon(scaleIcon(soundOnIcon, 60, 60));
+            else soundButton.setText("SOUND ON");
+        }
+        soundButton.repaint();
+    }
+    
+    @Override
+    public void setStartButtonListener(ActionListener listener) {
+        for (Component c : menuPanel.getComponents()) {
+            if (c instanceof JButton && "START".equals(((JButton) c).getActionCommand())) {
+                ((JButton) c).addActionListener(listener);
+            }
+        }
+    }
+    
+    private ImageIcon scaleIcon(BufferedImage img, int width, int height) {
+        if (img == null) return null;
+        Image scaledImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImg);
+    }
     
     private void initMenuPanel() {
-        menuImage = loadImage("/assets/background/bg.png");
+        menuImage = loadImage("/assets/background/menu.jpg");
+        
+        // Caricamento icone audio
+        musicOnIcon = loadImage("/assets/background/button_music.png");
+        musicOffIcon = loadImage("/assets/background/button_music_off.png");
+        soundOnIcon = loadImage("/assets/background/button_sound.png");
+        soundOffIcon = loadImage("/assets/background/button_sound_off.png");
         
         menuPanel = new JPanel(new GridBagLayout()) {
             @Override
@@ -113,7 +167,7 @@ public class SwingView implements IView{
                 }
                 if (font != null) {
                     g.setFont(font.deriveFont(60f));
-                    g.setColor(new Color(236, 204, 120));
+                    g.setColor(new Color(0, 0, 0));
                     String title = "KINGDOM RUSH";
                     int x = (getWidth() - g.getFontMetrics().stringWidth(title)) / 2;
                     g.drawString(title, x, 200);
@@ -121,38 +175,78 @@ public class SwingView implements IView{
             }
         };
         
-        JButton startButton = new JButton();
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // --- PANNELLO AUDIO (In alto a destra) ---
+        JPanel audioPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        audioPanel.setOpaque(false);
+
+        musicButton = createTransparentButton();
+        if (musicOnIcon != null) musicButton.setIcon(scaleIcon(musicOnIcon, 60, 60));
+        else musicButton.setText("MUSIC ON");
+        musicButton.setActionCommand("MUSIC");
+        musicButton.setVisible(true);
+
+        soundButton = createTransparentButton();
+        if (soundOnIcon != null) soundButton.setIcon(scaleIcon(soundOnIcon, 60, 60));
+        else soundButton.setText("SOUND ON");
+        soundButton.setActionCommand("SOUND");
+        soundButton.setVisible(true);
+
+        audioPanel.add(musicButton);
+        audioPanel.add(soundButton);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.1; 
+        gbc.anchor = GridBagConstraints.NORTHEAST;
+        gbc.insets = new Insets(20, 0, 0, 20); 
+        menuPanel.add(audioPanel, gbc);
+
+        // --- BOTTONE START (Al centro) ---
+        JButton startButton = createTransparentButton();
         playIcon = loadImage("/assets/background/button_play.png");
         if (playIcon != null) startButton.setIcon(new ImageIcon(playIcon));
         else startButton.setText("START");
-        
-        startButton.setContentAreaFilled(false);
-        startButton.setBorderPainted(false);
-        startButton.setOpaque(false);
-        startButton.setFocusPainted(false);
-        startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         startButton.setActionCommand("START");
+        startButton.setVisible(true);
 
-        menuPanel.add(startButton);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 2;
+        gbc.weighty = 0.9;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        menuPanel.add(startButton, gbc);
     }
     
     @Override
-    public void setStartButtonListener(ActionListener listener) {
-        for (Component c : menuPanel.getComponents()) {
-            if (c instanceof JButton) {
-                ((JButton) c).addActionListener(listener);
-            }
-        }
+    public void render(IModel model) {
+        this.model = model;
+        gamePanel.repaint();
     }
-    
+
+    @Override
+    public void showMessage(String message) {
+        JOptionPane.showMessageDialog(frame, message);
+    }
+
     @Override
     public void switchToGame() {
         cardLayout.show(mainContainer, "GAME");
-        mainContainer.revalidate();
-        mainContainer.repaint();
-        gamePanel.requestFocusInWindow();
     }
-    
+    private BufferedImage loadImage(String path) {
+        try {
+            return ImageIO.read(getClass().getResourceAsStream(path));
+        } catch (Exception e) {
+            System.err.println("Impossibile caricare asset: " + path);
+            return null; 
+        }
+    }
+
+    // ECCO IL METODO CHE ERA SPARITO!
     private JButton createTransparentButton() {
         JButton button = new JButton();
         button.setBorderPainted(false);
@@ -163,50 +257,24 @@ public class SwingView implements IView{
         button.setVerticalTextPosition(SwingConstants.CENTER);
         button.setForeground(Color.WHITE);
         button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Aggiunto cursore a manina per comodità!
         return button;
     }
 
-    @Override
-    public void render(IModel model) {
-        this.model = model;
-        gamePanel.repaint(); 
-    }
-
-    @Override
-    public void showMessage(String message) {
-        JOptionPane.showMessageDialog(frame, message);
-    }
-    
-    public JPanel getGamePanel() { return gamePanel; }
-    
-    private BufferedImage loadImage(String path) {
-            try {
-                return ImageIO.read(getClass().getResourceAsStream(path));
-            } catch (Exception e) {
-                System.err.println("Impossibile caricare asset: " + path);
-                return null; // Restituisce null per innescare i blocchi di fallback
-            }
-        }
-
     private class GamePanel extends JPanel {
         
-    	
-    	private Map<Integer, BufferedImage[]> towerAssets = new HashMap<>();
+        private Map<Integer, BufferedImage[]> towerAssets = new HashMap<>();
         private Map<Integer, BufferedImage> projectileAssets = new HashMap<>();
         private Map<Integer, BufferedImage[]> enemyAssets = new HashMap<>();
         private BufferedImage background, backgroundTop, lifespan, redBar;
         private BufferedImage hoveredSlot;
         private BufferedImage[] soldierFrames = new BufferedImage[20];
-    	
-    	
+        
         public GamePanel() {
-        	
-        	this.setPreferredSize(new Dimension(1056,864 ));
-            setBackground(Color.BLUE); // Un bel verde erba
+            this.setPreferredSize(new Dimension(1056,864 ));
+            setBackground(Color.BLUE);
             loadAssets();
         }
-        
-        
         
         private void loadAssets() {
             // Icone dei bottoni
@@ -239,35 +307,29 @@ public class SwingView implements IView{
             redBar = loadImage("/assets/HEALTHBAR/health_bar-04.png");
             hoveredSlot = loadImage("/assets/background/39.png");
 
-            // --- ANIMAZIONI: CARICAMENTO SMART CON CICLI FOR ---
-            
-            // Soldati (000 a 019)
+            // --- ANIMAZIONI ---
             for (int i = 0; i < 20; i++) {
                 soldierFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_%03d.png", i));
             }
             
-            // Orchi (001 a 010)
             BufferedImage[] orcFrames = new BufferedImage[19];
             for (int i = 0; i < 19; i++) {
                 orcFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_walk_%03d.png", i + 1));
             }
             enemyAssets.put(Enemy.ORC_TYPE, orcFrames);
             
-            // Scorpioni (001 a 010)
             BufferedImage[] scorpionFrames = new BufferedImage[10];
             for (int i = 0; i < 10; i++) {
                 scorpionFrames[i] = loadImage(String.format("/assets/SCORPION/1_enemies_1_walk_%03d.png", i + 1));
             }
             enemyAssets.put(Enemy.SCORPION_TYPE, scorpionFrames);
             
-            // Goblin (001 a 015)
             BufferedImage[] goblinFrames = new BufferedImage[15];
             for (int i = 0; i < 15; i++) {
                 goblinFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_walk_%03d.png", i + 1));
             }
             enemyAssets.put(Enemy.GOBLIN_TYPE, goblinFrames);
 
-            // Caricamento Font
             try {
                 java.io.InputStream is = getClass().getResourceAsStream("/assets/background/Grandover.ttf");
                 font = Font.createFont(Font.TRUETYPE_FONT, is);
@@ -283,51 +345,32 @@ public class SwingView implements IView{
 
         @Override
         protected void paintComponent(Graphics g) {
-        	super.paintComponent(g);
+            super.paintComponent(g);
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-            // 1. Calcoliamo la scala elastica in base alla dimensione attuale dello schermo
-            // 1408 e 1152 sono le coordinate "logiche" intoccabili della tua mappa
             scaleX = getWidth() / 1056.0;
             scaleY = getHeight() / 864.0;
 
-            // Salviamo il pennello originale
             AffineTransform oldTransform = g2d.getTransform();
-
-            // 2. STIRIAMO IL PENNELLO!
             g2d.scale(scaleX, scaleY);
-
-            // =================================================================
-            // DA QUI IN POI, DISEGNI TUTTO ESATTAMENTE COME HAI SEMPRE FATTO!
-            // Usa le coordinate normali, Java le rimpicciolirà/ingrandirà da solo
-            // =================================================================
 
             if (background != null) {
                 g2d.drawImage(background, 0, 0, 1056, 864, null); 
             }
             
-            
             drawEnemies(g2d);
             drawSoldiers(g2d);
-            
-            
             
             if (backgroundTop != null) {
                 g2d.drawImage(backgroundTop, 0, 0, 1056, 864, null); 
             }
-            // Ripristiniamo il pennello PRIMA di disegnare la UI o aggiornare i bottoni
             
             drawSlots(g2d);
             drawProjectiles(g2d);
             g2d.setTransform(oldTransform);
             
-            
-            
-            // Disegniamo la UI (testi, vite) SENZA scala, così i font restano nitidi
             drawUI(g2d);
-            
-            // Aggiorniamo la posizione dei bottoni
             updateMenuButton();
         }
         
@@ -355,7 +398,6 @@ public class SwingView implements IView{
         private void drawSlots(Graphics2D g) {
             for (TowerSlot slot : model.getAvailableSlots()) {
                 
-                // Calcoliamo il VERO centro della piazzola per centrare torri e cerchi
                 int cx = slot.getX() + (slot.getWidth() / 2);
                 int cy = slot.getY() + (slot.getHeight() / 2);
 
@@ -365,10 +407,8 @@ public class SwingView implements IView{
                     int imageIndex = tower.getLvl() - 1;
                     
                     if (levelsArray != null && imageIndex < levelsArray.length && levelsArray[imageIndex] != null) {
-                        // Usiamo cx e cy al posto di getX e getY per mantenere le torri centrate!
                         g.drawImage(levelsArray[imageIndex], cx - 27, cy - 55, 60, 70, null);
                     } else {
-                        // Fallback Torri
                         if (tower.getType() == Tower.ARCHER_TYPE) g.setColor(new Color(34, 139, 34)); 
                         else g.setColor(new Color(128, 0, 128));
                         g.fill3DRect(cx - 25, cy - 25, 50, 50, true);
@@ -376,25 +416,19 @@ public class SwingView implements IView{
                         g.drawString("Lvl " + tower.getLvl(), cx - 10, cy);
                     } 
                 } else if (slot == model.getHoveredSlot()) {
-                    
-                    // LA TUA NUOVA IMMAGINE HOVER!
                     if (hoveredSlot != null) {
-                        // Disegna il png perfettamente sopra il rettangolo di Tiled
                         g.drawImage(hoveredSlot, slot.getX(), slot.getY(), slot.getWidth(), slot.getHeight(), null);
                     } else {
-                        // Fallback di emergenza
                         g.setColor(new Color(255, 215, 0, 70)); 
                         g.fillRect(slot.getX(), slot.getY(), slot.getWidth(), slot.getHeight());
                     }
                 }
             }
             
-            // Logica dei Cerchi del Range
             TowerSlot slotToHighlight = null;
             TowerSlot selectedSlot = model.getSelectedBuildSlot();
             
             if (selectedSlot != null && selectedSlot.isOccupied()) {
-                // Ricalcoliamo il centro per far partire il cerchio dal cuore della torre
                 int cx = selectedSlot.getX() + (selectedSlot.getWidth() / 2);
                 int cy = selectedSlot.getY() + (selectedSlot.getHeight() / 2);
                 int r = selectedSlot.getTower().getRange();
@@ -424,7 +458,6 @@ public class SwingView implements IView{
         private void updateMenuButton() {
             TowerSlot slot = model.getSelectedBuildSlot();
             
-            // Nascondiamo tutto di default
             archerButton.setVisible(false);
             mageButton.setVisible(false);
             cannonButton.setVisible(false);
@@ -434,11 +467,10 @@ public class SwingView implements IView{
             
             if (slot == null) return;
             
-            int x = (int) (slot.getX() * scaleX); // Moltiplica per la scala!
-            int y = (int) (slot.getY() * scaleY); // Moltiplica per la scala!
+            int x = (int) (slot.getX() * scaleX); 
+            int y = (int) (slot.getY() * scaleY); 
 
             if (!slot.isOccupied()) {
-                // Scaliamo anche la grandezza dei bottoni
                 int w = (int) (200 * scaleX);
                 int h = (int) (200 * scaleY);
                 
@@ -470,68 +502,54 @@ public class SwingView implements IView{
         }
         
         private void drawProjectiles(Graphics2D g) {
-        	
+            for (Projectile p : model.getActiveProjectiles()) {
+                double visualTilt = Math.toRadians(70); 
+                double maxArcHeight;
+                
+                if(p.getType() == Projectile.ARCHER_PROJECTILE) {
+                    maxArcHeight = 60.0;
+                } else if(p.getType() == Projectile.MAGE_PROJECTILE) {
+                    maxArcHeight = 20.0;
+                } else if(p.getType() == Projectile.CANNON_PROJECTILE) {
+                    maxArcHeight = 120.0;
+                } else {
+                    maxArcHeight = 40.0;
+                }
+                
+                double lx = p.getX() ;
+                double ly = p.getY() ;
 
-        	
-        	
-        	
+                double totalDist = p.getTotalDistanceToTravel(); 
+                double distTraveled = p.getDistanceTraveled();
 
-        	for (Projectile p : model.getActiveProjectiles()) {
-        		
-        		double visualTilt = Math.toRadians(70); 
-        		double maxArcHeight;
-        		
-        		if(p.getType() == Projectile.ARCHER_PROJECTILE) {
-        			maxArcHeight = 60.0;
-        		} else if(p.getType() == Projectile.MAGE_PROJECTILE) {
-        			maxArcHeight = 20.0;
-        		} else if(p.getType() == Projectile.CANNON_PROJECTILE) {
-        			maxArcHeight = 120.0;
-        		} else {
-        			maxArcHeight = 40.0;
-        		}
-        		
-        	    double lx = p.getX() ;
-        	    double ly = p.getY() ;
+                double progress = Math.min(1.0, distTraveled / totalDist);
+                if (Double.isNaN(progress)) progress = 1.0; 
 
+                double parabolaFactor = 4.0 * progress * (1.0 - progress);
+                double currentHeightOffset = maxArcHeight * parabolaFactor;
 
-        	    double totalDist = p.getTotalDistanceToTravel(); 
-        	    double distTraveled = p.getDistanceTraveled();
+                int vx = (int)lx;
+                int vy = (int)(ly - currentHeightOffset); 
 
-        	    double progress = Math.min(1.0, distTraveled / totalDist);
-        	    if (Double.isNaN(progress)) progress = 1.0; 
-
-
-        	    double parabolaFactor = 4.0 * progress * (1.0 - progress);
-
-        	    double currentHeightOffset = maxArcHeight * parabolaFactor;
-
-        	    int vx = (int)lx;
-        	    int vy = (int)(ly - currentHeightOffset); 
-
-        	    double baseAngle = p.getAngle();
-        	    double tiltDirection = (Math.cos(baseAngle) >= 0) ? 1.0 : -1.0;
+                double baseAngle = p.getAngle();
+                double tiltDirection = (Math.cos(baseAngle) >= 0) ? 1.0 : -1.0;
     
-        	    double arcTilt = (1.0 - 2.0 * progress) * visualTilt*tiltDirection;
-        	    
-        	    double finalRenderAngle = baseAngle - arcTilt; 
+                double arcTilt = (1.0 - 2.0 * progress) * visualTilt*tiltDirection;
+                double finalRenderAngle = baseAngle - arcTilt; 
 
+                BufferedImage img = projectileAssets.get(p.getType());
 
-        	    BufferedImage img = projectileAssets.get(p.getType());
-
-        	    if (img != null) {
-        	        AffineTransform oldTransform = g.getTransform();
-        	        g.translate(vx, vy); 
-        	        g.rotate(finalRenderAngle);
-        	        g.drawImage(img, -14, -4, 14, 8, null); 
-        	        g.setTransform(oldTransform);
-        	    } else {
-        	        // Fallback drawing segue comunque la parabola
-        	        g.setColor(p.getType() == Tower.ARCHER_TYPE ? new Color(34, 139, 34) : new Color(128, 0, 128)); 
-        	        g.fillOval(vx - 5, vy - 5, 10, 10); // Più piccolo e centrato
-        	    }
-        	    
-        	}
+                if (img != null) {
+                    AffineTransform oldTransform = g.getTransform();
+                    g.translate(vx, vy); 
+                    g.rotate(finalRenderAngle);
+                    g.drawImage(img, -14, -4, 14, 8, null); 
+                    g.setTransform(oldTransform);
+                } else {
+                    g.setColor(p.getType() == Tower.ARCHER_TYPE ? new Color(34, 139, 34) : new Color(128, 0, 128)); 
+                    g.fillOval(vx - 5, vy - 5, 10, 10); 
+                }
+            }
         }
         
         private void drawSoldiers(Graphics2D g) {
@@ -539,7 +557,7 @@ public class SwingView implements IView{
                 int sx = (int) s.getX();
                 int sy = (int) s.getY();
                 
-                g.setColor(new Color(0, 0, 0, 80)); // Ombra
+                g.setColor(new Color(0, 0, 0, 80)); 
                 g.fillOval(sx - 20, sy + 7, 14, 10);
                 
                 if (s.isMoving() && soldierFrames[0] != null) {
@@ -555,15 +573,13 @@ public class SwingView implements IView{
                 drawHealthBar(g, sx - 20, sy - 25, s.getHealth(), s.getMaxHealth());
             }
         }
-        		
-        
 
         private void drawEnemies(Graphics2D g) {
             for (Enemy e : model.getActiveEnemies()) {
                 int ex = (int) e.getX();
                 int ey = (int) e.getY();
                 
-                g.setColor(new Color(0, 0, 0, 80)); // Ombra
+                g.setColor(new Color(0, 0, 0, 80)); 
                 g.fillOval(ex - 11, ey + 9, 14, 10);
                 
                 BufferedImage[] frames = enemyAssets.get(e.getType());
@@ -615,5 +631,6 @@ public class SwingView implements IView{
                 drawShadowText(g, "GAME OVER", 520, 380, titleColor, 8);
             }
         }
+        
     }
 }

@@ -29,10 +29,12 @@ public class ConsoleView implements IView {
 		}
 	}
 	
+	@Override
 	public double getScaleX() {
 		return 1.0;
 	}
 	
+	@Override
 	public double getScaleY() {
 		return 1.0;
 	}
@@ -41,40 +43,66 @@ public class ConsoleView implements IView {
 	public void showMessage(String message) {
 		System.out.println("MESSAGGIO >> " + message);
 	}
+
+	// --- METODI AUDIO MANCANTI ---
+	@Override
+	public void addMusicListener(ActionListener listener) {
+		// Non implementato per la console
+	}
+
+	@Override
+	public void addSoundListener(ActionListener listener) {
+		// Non implementato per la console
+	}
+
+	@Override
+	public void updateMusicIcon(boolean isMuted) {
+		// Non implementato per la console
+	}
+
+	@Override
+	public void updateSoundIcon(boolean isMuted) {
+		// Non implementato per la console
+	}
 	
+	// --- ALTRI LISTENER ---
 	@Override
 	public void addArcherListener(ActionListener listener) {
 		// Non implementato per la console
 	}
 	
+	@Override
 	public void addMageListener(ActionListener listener) {
 		// Non implementato per la console
 	}
 	
+	@Override
 	public void addCannonListener(ActionListener listener) {
 		// Non implementato per la console
 	}
 	
+	@Override
 	public void addBarracksListener(ActionListener listener) {
 		// Non implementato per la console
 	}
 
-	 @Override
+	@Override
     public void addUpgradeListener(ActionListener listener) {
-    	
+    	// Non implementato per la console
     }
 
 	@Override
 	public void addRallyListener(ActionListener listener) {
-
+		// Non implementato per la console
 	}
 
 	@Override
 	public void setStartButtonListener(ActionListener listener) {
-
+		// Non implementato per la console
 	}
+
 	@Override
 	public void switchToGame() {
-
+		// Non implementato per la console
 	}
 }

@@ -19,6 +19,9 @@ public class Controller extends MouseAdapter{
 	private IModel model;
 	private IView view;
     private Timer gameTimer;
+    
+    private boolean isMusicMuted = false;
+	private boolean isSoundMuted = false;
 	
 	public Controller(IModel model, IView view) {
 		this.model = model;
@@ -48,6 +51,8 @@ public class Controller extends MouseAdapter{
                 startGame(); 
             }
         });
+        this.view.addMusicListener(e -> toggleMusic());
+        this.view.addSoundListener(e -> toggleSound());
 	}
 	
 	public void attachToPanel(JPanel panel) {
@@ -181,5 +186,15 @@ public class Controller extends MouseAdapter{
             });
             gameTimer.start();
         }
+    }
+    
+    private void toggleMusic() {
+        isMusicMuted = !isMusicMuted;
+        view.updateMusicIcon(isMusicMuted);
+    }
+
+    private void toggleSound() {
+        isSoundMuted = !isSoundMuted;
+        view.updateSoundIcon(isSoundMuted);
     }
 }
