@@ -7,7 +7,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 public class Main {
-//matti sei un coglione//
+//mario sei un coglione//
     public static void main(String[] args) {
         // L'interfaccia grafica Swing va gestita nel suo thread specifico
         SwingUtilities.invokeLater(() -> {
