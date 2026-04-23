@@ -1,5 +1,6 @@
 package gioco.model;
 
+import java.util.List;
 
 public class Projectile {
 
@@ -71,7 +72,7 @@ public class Projectile {
 		return this.type;
 	}
 	
-	public void move() {
+	public void move(List<Enemy> allEnemies) {
 		if(target == null || target.isDead() || hit) {
 			hit = true;
 			return;
@@ -83,15 +84,30 @@ public class Projectile {
 		//double distanza = Math.sqrt(Math.pow(distanzaX,2) + Math.pow(distanzaY, 2));
 		
 		if(distanceFromEnemy < this.projectileSpeed) {
-			target.takeDamage(damage);
+			
 			hit = true;
-			return;
-		} 
+			
+			if(this.type == CANNON_PROJECTILE) {
+				double explosionRadius = 45.0;
+				
+				for(Enemy enemy : allEnemies) {
+					if(!enemy.isDead()) {
+						double distFromExplosion = Math.hypot(enemy.getX() - target.getX(), enemy.getY() - target.getY());
+						if(distFromExplosion <= explosionRadius) {
+							enemy.takeDamage(damage); // Danno aggiuntivo per i nemici vicini all'esplosione
+						}
+					}
+				}
+		} else {
+			target.takeDamage(damage);
+		}
+		}else {
 		
-		double velX = (distanceX/distanceFromEnemy)*projectileSpeed;
-		double velY = (distanceY/distanceFromEnemy)*projectileSpeed;		
-		this.x += velX;
-		this.y += velY;
+			double velX = (distanceX/distanceFromEnemy)*projectileSpeed;
+			double velY = (distanceY/distanceFromEnemy)*projectileSpeed;		
+			this.x += velX;
+			this.y += velY;
+		}
 			
 	}
 }

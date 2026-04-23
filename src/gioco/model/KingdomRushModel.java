@@ -366,7 +366,7 @@ public class KingdomRushModel implements IModel{
 		
 		// 5. PROIETTILI IN VOLO
 		for (Projectile p : projectiles) {
-			p.move();
+			p.move(enemies);
 			if (p.hasHit()) {
 				projectilesToRemove.add(p);
 			}
