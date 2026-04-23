@@ -33,10 +33,20 @@ public class KingdomRushModel implements IModel{
 		this.enemyPath = MapLoader.loadPathsFromTMX("/assets/maps/tail_6.tmx");
 		this.slots = MapLoader.loadSlotsFromTMX("/assets/maps/tail_6.tmx");
 		
+		Wave wave1 = new Wave(70); // 70 è lo spawnDelay
+		wave1.addEnemyGroup(Enemy.GOBLIN_TYPE, 10);
+		waves.add(wave1);
 		
-		waves.add(new Wave(10,70,Enemy.GOBLIN_TYPE));
-		waves.add(new Wave(6,40,Enemy.SCORPION_TYPE));
-		waves.add(new Wave(3,90,Enemy.ORC_TYPE));
+		Wave wave2 = new Wave(40);
+		wave2.addEnemyGroup(Enemy.SCORPION_TYPE, 6);
+		waves.add(wave2);
+		
+		Wave wave3 = new Wave(60); // Ritmo intermedio
+		wave3.addEnemyGroup(Enemy.ORC_TYPE, 5);
+		wave3.addEnemyGroup(Enemy.GOBLIN_TYPE, 8);
+		wave3.addEnemyGroup(Enemy.SCORPION_TYPE, 3);
+		wave3.shuffleEnemies(); // Mischia tutto il gruppo casualmente!
+		waves.add(wave3);
 	}
 	
 	@Override
@@ -378,12 +388,11 @@ public class KingdomRushModel implements IModel{
 			spawnTimer++;
 
 			if (spawnTimer >= currentWave.getSpawnDelay() && !currentWave.isFinished()) {
-				int type = currentWave.getEnemyType();
+				int type = currentWave.getNextEnemyType();
 				if(type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40,0.5,enemyPath.get(0),5,type,tikCounter,3, 11));
 				else if(type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(20,0.8,enemyPath.get(1),3,type,tikCounter,3 , 8));
 				else if(type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(90,0.3,enemyPath.get(0),12,type,tikCounter,3 , 15));
 				 
-				currentWave.decreaseEnemyCount();
 				spawnTimer = 0; 
 			}
 			if (currentWave.isFinished() && enemies.isEmpty()) {

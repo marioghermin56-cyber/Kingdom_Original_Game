@@ -1,36 +1,40 @@
 package gioco.model;
 
+
+import java.util.LinkedList;
+import java.util.Collections;
+
 public class Wave {
 
-	private int enemyCount;
 	private int spawnDelay;
-	private int enemyType;
+	private LinkedList<Integer> enemiesQueue;
 	
-	public Wave(int enemyCount,int spawnDelay, int enemyType) {
-		this.enemyCount = enemyCount;
+	public Wave(int spawnDelay) {
+		this.enemiesQueue = new LinkedList<>();
 		this.spawnDelay = spawnDelay;
-		this.enemyType = enemyType;
 		
 		}
 	
-	public int getEnemyCount(){
-			return this.enemyCount;
+	public void addEnemyGroup(int enemyType, int count) {
+		for (int i = 0; i < count; i++) {
+			enemiesQueue.add(enemyType);
 		}
+	}
 	
-	public int getEnemyType() {
-		return this.enemyType;
+	public void shuffleEnemies() {
+		Collections.shuffle(enemiesQueue);
 	}
 	
 	public int getSpawnDelay() {
 		return this.spawnDelay;
 	}
 	
-	public void decreaseEnemyCount() {
-		this.enemyCount--;
+	public boolean isFinished() {
+		return enemiesQueue.isEmpty();
 	}
 	
-	public boolean isFinished() {
-		return this.enemyCount <= 0;
+	public int getNextEnemyType() {
+		return enemiesQueue.poll(); 
 	}
 }
 
