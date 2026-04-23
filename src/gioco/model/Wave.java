@@ -6,6 +6,16 @@ import java.util.Collections;
 
 public class Wave {
 
+	
+	public static class SpawnRequest{
+		public int type;
+		public int pathIndex;
+		
+		public SpawnRequest(int type, int pathIndex) {
+			this.type = type;
+			this.pathIndex = pathIndex;
+		}
+	}
 	private int spawnDelay;
 	private LinkedList<Integer> enemiesQueue;
 	
