@@ -269,6 +269,8 @@ public class SwingView implements IView {
         private BufferedImage background, backgroundTop, lifespan, redBar;
         private BufferedImage hoveredSlot;
         private BufferedImage[] soldierFrames = new BufferedImage[20];
+        private BufferedImage[] soldierFightFrames = new BufferedImage[20];
+        private BufferedImage[] soldierIdleFrames = new BufferedImage[20];
         
         public GamePanel() {
             this.setPreferredSize(new Dimension(1056,864 ));
@@ -310,6 +312,14 @@ public class SwingView implements IView {
             // --- ANIMAZIONI ---
             for (int i = 0; i < 20; i++) {
                 soldierFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_%03d.png", i));
+            }
+            
+            for (int i = 0; i < 20; i++) {
+                soldierIdleFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_idle_%03d.png", i));
+            }
+            
+            for(int i = 0;i < 20; i++) {
+            	soldierFightFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_attack_%03d.png", i));
             }
             
             BufferedImage[] orcFrames = new BufferedImage[19];
@@ -509,7 +519,7 @@ public class SwingView implements IView {
                 if(p.getType() == Projectile.ARCHER_PROJECTILE) {
                     maxArcHeight = 60.0;
                 } else if(p.getType() == Projectile.MAGE_PROJECTILE) {
-                    maxArcHeight = 20.0;
+                    maxArcHeight = 10.0;
                 } else if(p.getType() == Projectile.CANNON_PROJECTILE) {
                     maxArcHeight = 120.0;
                 } else {
@@ -557,19 +567,49 @@ public class SwingView implements IView {
                 int sx = (int) s.getX();
                 int sy = (int) s.getY();
                 
-                g.setColor(new Color(0, 0, 0, 80)); 
-                g.fillOval(sx - 20, sy + 7, 14, 10);
+                int shadowX = s.isFacingRight() ? (sx - 20) : (sx - 12);
                 
-                if (s.isMoving() && soldierFrames[0] != null) {
+                g.setColor(new Color(0, 0, 0, 80)); 
+                g.fillOval(shadowX, sy + 7, 14, 10);
+                
+                BufferedImage imgToDraw = null;
+
+                if (s.isMoving() && soldierFrames != null && soldierFrames[0] != null) {
                     int frameIndex = (s.getTikCounter() / 2) % soldierFrames.length;
-                    g.drawImage(soldierFrames[frameIndex], sx - 24, sy - 24, 30, 40, null);
-                } else if (soldierFrames[0] != null) {
-                    g.drawImage(soldierFrames[0], sx - 24, sy - 24, 30, 40, null);
+                    imgToDraw = soldierFrames[frameIndex];
+                    
+                } else if (s.isBusy() && soldierFightFrames != null && soldierFightFrames[0] != null) {
+                    int frameIndex = (s.getTikCounter() / 2) % soldierFightFrames.length;
+                    imgToDraw = soldierFightFrames[frameIndex];
+                    
+                } else if (soldierIdleFrames != null && soldierIdleFrames[0] != null) {
+                    int frameIndex = (s.getTikCounter() / 5) % soldierIdleFrames.length;
+                    imgToDraw = soldierIdleFrames[frameIndex];
+                }
+
+                // 2. Disegniamola!
+                if (imgToDraw != null) {
+                    int drawX = sx - 24;
+                    int drawY = sy - 24;
+                    int drawW = 30;
+                    int drawH = 40;
+
+                    if (s.isFacingRight()) {
+                        // Disegno NORMALE (verso destra)
+                        g.drawImage(imgToDraw, drawX, drawY, drawW, drawH, null);
+                    } else {
+                        // Disegno SPECCHIATO (verso sinistra)
+                        // Usiamo una funzione speciale di Java che inverte le coordinate di destinazione sulla X
+                        g.drawImage(imgToDraw, 
+                                    drawX + drawW, drawY, drawX, drawY + drawH, // Coordinate Schermo (Destra -> Sinistra)
+                                    0, 0, imgToDraw.getWidth(), imgToDraw.getHeight(), // Coordinate Immagine 
+                                    null);
+                    }
                 } else {
+                    // Fallback d'emergenza se mancano tutte le immagini
                     g.setColor(Color.RED); 
                     g.fillOval(sx - 12, sy - 12, 24, 24);
                 }
-                
                 drawHealthBar(g, sx - 20, sy - 25, s.getHealth(), s.getMaxHealth());
             }
         }
@@ -579,18 +619,40 @@ public class SwingView implements IView {
                 int ex = (int) e.getX();
                 int ey = (int) e.getY();
                 
+                int shadowX = e.isFacingRight() ? (ex - 11) : (ex - 3);
+                // Disegno dell'ombra
                 g.setColor(new Color(0, 0, 0, 80)); 
-                g.fillOval(ex - 11, ey + 9, 14, 10);
+                g.fillOval(shadowX, ey + 9, 14, 10);
                 
                 BufferedImage[] frames = enemyAssets.get(e.getType());
                 if (frames != null && frames.length > 0) {
-                    int frameIndex = e.getTikCounter() % frames.length;
-                    g.drawImage(frames[frameIndex], ex - 18, ey - 18, 36, 36, null);
+                    // Nota: ho aggiunto un /2 o /3 fittizio, se l'animazione dei nemici ti sembra 
+                    // troppo veloce rispetto a quella dei soldati, aggiungilo come hai fatto per loro!
+                    int frameIndex = (e.getTikCounter() / 2) % frames.length; 
+                    BufferedImage imgToDraw = frames[frameIndex];
+                    
+                    int drawX = ex - 18;
+                    int drawY = ey - 18;
+                    int drawW = 36;
+                    int drawH = 36;
+                    
+                    if (e.isFacingRight()) {
+                        // Disegno NORMALE (verso destra)
+                        g.drawImage(imgToDraw, drawX, drawY, drawW, drawH, null);
+                    } else {
+                        // Disegno SPECCHIATO (verso sinistra)
+                        g.drawImage(imgToDraw, 
+                                    drawX + drawW, drawY, drawX, drawY + drawH, 
+                                    0, 0, imgToDraw.getWidth(), imgToDraw.getHeight(), 
+                                    null);
+                    }
                 } else {
+                    // Fallback
                     g.setColor(Color.RED); 
                     g.fillOval(ex - 12, ey - 12, 24, 24);
                 }
                 
+                // Barra della vita sempre dritta sopra al nemico
                 drawHealthBar(g, ex - 15, ey - 25, e.getHealth(), e.getMaxHealth());
             }
         }

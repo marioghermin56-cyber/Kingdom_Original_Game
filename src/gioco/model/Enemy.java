@@ -30,6 +30,7 @@ public class Enemy {
 	private int attackDamage;
 	private int attackCooldown;
 	private int currentCooldown;
+	private boolean isFacingRight = true;
 	
 	public Enemy(int health, double speed, EnemyPath path, int value, int type, int tikCounter, int attackDamage, int attackCooldown) {
 		this.health = health;
@@ -45,12 +46,17 @@ public class Enemy {
 		this.attackCooldown = attackCooldown;
 		this.currentCooldown = attackCooldown;
 		
+		
 		if(path != null && !path.getWaypoints().isEmpty()) {
 			gioco.model.Point spawnPoint = path.getWaypoints().get(0);
 			this.x = spawnPoint.getX();
 			this.y = spawnPoint.getY();
 		}
 		
+	}
+	
+	public boolean isFacingRight() {
+		return this.isFacingRight;
 	}
 	
 	public int getCurrentCooldown() {
@@ -133,6 +139,9 @@ public void move() {
 		// Teorema di Pitagora per trovare la distanza totale in linea retta
 		double distance = Math.sqrt((dx * dx) + (dy * dy));
 		
+		if (dx != 0) {
+		    this.isFacingRight = (dx > 0);
+		}
 		// Se la distanza rimanente è minore della nostra velocità, siamo arrivati al waypoint!
 		if (distance <= speed) {
 			this.x = target.getX();

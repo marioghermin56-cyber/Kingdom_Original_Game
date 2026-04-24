@@ -17,6 +17,7 @@ public class Soldier {
 	private int formationIndex;
 	private int tikCounter=0;
 	private Tower parentTower;
+	private boolean isFacingRight = true;
 
 	
 	public Soldier(double x, double y, int formationIndex, Tower parentTower) {
@@ -47,6 +48,10 @@ public class Soldier {
 		return this.tikCounter;
 	}
 	
+	public boolean isFacingRight() {
+		return this.isFacingRight;
+	}
+	
 	public void setDestination(Point destination) {
 		
 		if (this.target != null) {
@@ -65,25 +70,25 @@ public class Soldier {
 	}
 	
 	public void move() {
-		if(!isMoving) {
-			tikCounter = 0;
-			return;
-		}
-		tikCounter++;
 		
 		double dx = destX - x;
 		double dy = destY - y;
 		
 		double distance = Math.hypot(dx, dy);
 		
-		if(distance <= this.speed) {
-			this.x = destX;
-			this.y = destY;
-			this.isMoving = false;
-		}else {
-			this.x += (dx/distance)*speed;
-			this.y += (dy/distance)*speed;
-		}		
+		if (dx != 0) {
+		    this.isFacingRight = (dx > 0);
+		}
+
+		// 2. Movimento fisico
+		if (distance <= this.speed) {
+		    this.x = destX;
+		    this.y = destY;
+		    this.isMoving = false;
+		} else {
+		    this.x += (dx / distance) * speed;
+		    this.y += (dy / distance) * speed;
+		}	
 	}
 	
 	public double getX() {
@@ -120,6 +125,9 @@ public class Soldier {
     
     public void setTarget(Enemy enemy) {
     	this.target = enemy;
+    	if (enemy != null) {
+    	    this.isFacingRight = (enemy.getX() > this.x);
+    	}
     }
     
     public void takeDamage(int amount) {
@@ -137,5 +145,9 @@ public class Soldier {
     	} else {
     		this.target = null;
     	}
+    }
+    
+    public void updateTikCounter() {
+    	tikCounter++;
     }
 }

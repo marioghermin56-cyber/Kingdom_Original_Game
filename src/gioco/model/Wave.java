@@ -1,7 +1,8 @@
 package gioco.model;
 
-
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Collections;
 
 public class Wave {
@@ -17,23 +18,31 @@ public class Wave {
 		}
 	}
 	
+	private Map<Integer, LinkedList<Integer>> pathQueues;
+	private Map<Integer, Integer> pathTimers;
 	private int spawnDelay;
-	private LinkedList<SpawnRequest> enemiesQueue;
 	
 	public Wave(int spawnDelay) {
-		this.enemiesQueue = new LinkedList<>();
 		this.spawnDelay = spawnDelay;
+		this.pathQueues = new HashMap<>();
+        this.pathTimers = new HashMap<>();
 		
 		}
 	
 	public void addEnemyGroup(int enemyType, int count, int pathIndex) {
+		
+		pathQueues.putIfAbsent(pathIndex, new LinkedList<>());
+        pathTimers.putIfAbsent(pathIndex, 0);
+        LinkedList<Integer> queue = pathQueues.get(pathIndex);
         for (int i = 0; i < count; i++) {
-            enemiesQueue.add(new SpawnRequest(enemyType, pathIndex));
+            queue.add(enemyType);
         }
     }
 	
 	public void shuffleEnemies() {
-		Collections.shuffle(enemiesQueue);
+		for(LinkedList<Integer> queue : pathQueues.values()) {
+			Collections.shuffle(queue);
+		}
 	}
 	
 	public int getSpawnDelay() {
@@ -41,11 +50,20 @@ public class Wave {
 	}
 	
 	public boolean isFinished() {
-		return enemiesQueue.isEmpty();
+		for(LinkedList<Integer> queue : pathQueues.values()) {
+			if(!queue.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
-	public SpawnRequest getNextEnemyType() {
-		return enemiesQueue.poll(); 
+	public Map<Integer, LinkedList<Integer>> getPathQueues() {
+        return pathQueues;
+    }
+	
+	public Map<Integer,Integer> getPathTimer(){
+		return pathTimers;
 	}
 }
 

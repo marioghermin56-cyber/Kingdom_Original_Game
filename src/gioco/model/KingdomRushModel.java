@@ -2,6 +2,7 @@ package gioco.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedList;
 
 public class KingdomRushModel implements IModel{
 	private int playerHealth;
@@ -33,11 +34,11 @@ public class KingdomRushModel implements IModel{
 		this.enemyPath = MapLoader.loadPathsFromTMX("/assets/maps/tail_6.tmx");
 		this.slots = MapLoader.loadSlotsFromTMX("/assets/maps/tail_6.tmx");
 		
-		Wave wave1 = new Wave(70);
-		wave1.addEnemyGroup(Enemy.GOBLIN_TYPE, 10, 0); 
-		wave1.addEnemyGroup(Enemy.ORC_TYPE, 4, 1);
-		wave1.shuffleEnemies();
-		waves.add(wave1);
+		Wave wave = new Wave(120); 
+		wave.addEnemyGroup(Enemy.GOBLIN_TYPE, 10, 0); // Sentiero 0
+		wave.addEnemyGroup(Enemy.ORC_TYPE, 10, 1);    // Sentiero 1
+		wave.shuffleEnemies(); 
+		waves.add(wave);
 		
 		// ONDATA 2: Attacco da due lati!
 		Wave wave2 = new Wave(50);
@@ -112,9 +113,9 @@ public class KingdomRushModel implements IModel{
 	        }
 
 	        // 4. Assegniamo le nuove destinazioni sfalsate per tenerli in formazione
-	        if (mySoldiers.size() > 0) mySoldiers.get(0).setDestination(new Point(logicalX - 20, logicalY - 20));
-	        if (mySoldiers.size() > 1) mySoldiers.get(1).setDestination(new Point(logicalX + 20, logicalY - 20));
-	        if (mySoldiers.size() > 2) mySoldiers.get(2).setDestination(new Point(logicalX, logicalY + 20));
+	        if (mySoldiers.size() > 0) mySoldiers.get(0).setDestination(new Point(logicalX - 10, logicalY - 10));
+	        if (mySoldiers.size() > 1) mySoldiers.get(1).setDestination(new Point(logicalX + 10, logicalY - 10));
+	        if (mySoldiers.size() > 2) mySoldiers.get(2).setDestination(new Point(logicalX, logicalY + 10));
 	    }
 
 	    // A prescindere che il click fosse valido o fuori range, usciamo dalla modalità
@@ -264,16 +265,16 @@ public class KingdomRushModel implements IModel{
 							double offsetY = 0;
 							
 							if (freeIndex == 0) {
-								offsetX = -20;
-								offsetY = -20;
+								offsetX = -10;
+								offsetY = -10;
 								}
 							else if (freeIndex  == 1) { 
-								offsetX = 20;
-								offsetY = -20; 
+								offsetX = 10;
+								offsetY = -10; 
 								}
 							else if (freeIndex == 2) { 
 								offsetX = 0;
-								offsetY = 20; 
+								offsetY = 10; 
 								}
 							
 							// C. CREIAMO IL SOLDATO DANDOGLI LA SUA "MATRICOLA"
@@ -330,6 +331,7 @@ public class KingdomRushModel implements IModel{
 		
 		for (Soldier soldier : activeSoldiers) {
 			
+			soldier.updateTikCounter();
 			if(soldier.isDead()) {
 				if (soldier.getEnemy() != null) {
 					soldier.getEnemy().setBlocked(false); 
@@ -383,25 +385,35 @@ public class KingdomRushModel implements IModel{
 		// 6. SPAWN DELLE ONDATE
 		if (currentWaveIndex < waves.size()) {
 			Wave currentWave = waves.get(currentWaveIndex);
-			spawnTimer++;
+			
+			if(spawnTimer < 0) {
+				spawnTimer++;
+			}else if(!currentWave.isFinished()) {
+				for(Integer pathIndex : currentWave.getPathQueues().keySet()) {
+					LinkedList<Integer> queue = currentWave.getPathQueues().get(pathIndex);
+					
+					if(!queue.isEmpty()) {
+						int timer = currentWave.getPathTimer().get(pathIndex);
+						timer++;
+						
+						if(timer >= currentWave.getSpawnDelay()) {
+							int type = queue.poll();
+							EnemyPath assignedPath = enemyPath.get(pathIndex);
 
-			if (spawnTimer >= currentWave.getSpawnDelay() && !currentWave.isFinished()) {
-				
-				Wave.SpawnRequest request = currentWave.getNextEnemyType(); 
-				int type = request.type;
-				int pathIndex = request.pathIndex;
-				
-				EnemyPath assignedPath = enemyPath.get(pathIndex);
-				
-				if(type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40,0.5,assignedPath,5,type,tikCounter,3, 11));
-				else if(type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(20,0.8,assignedPath,3,type,tikCounter,3 , 8));
-				else if(type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(90,0.3,assignedPath,12,type,tikCounter,3 , 15));
-				 
-				spawnTimer = 0; 
+							if(type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40,0.5,assignedPath,5,type,tikCounter,3, 11));
+							else if(type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(20,0.8,assignedPath,3,type,tikCounter,3 , 8));
+							else if(type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(90,0.3,assignedPath,12,type,tikCounter,3 , 15));
+							
+							currentWave.getPathTimer().put(pathIndex, 0);
+						} else {
+							currentWave.getPathTimer().put(pathIndex, timer);
+						}
+					}
+				}
 			}
 			if (currentWave.isFinished() && enemies.isEmpty()) {
 				currentWaveIndex++;
-				spawnTimer = -90;   
+				spawnTimer = -90; // Pausa di 90 tick prima della prossima ondata
 			}
 		}
 		
