@@ -3,6 +3,7 @@ package gioco.controller;
 import javax.swing.SwingUtilities;
 
 import gioco.model.IModel;
+import gioco.model.KingdomRushModel;
 import gioco.model.Tower;
 import gioco.model.TowerSlot;
 import gioco.view.IView;
@@ -16,29 +17,33 @@ import javax.swing.JPanel;
 
 public class Controller extends MouseAdapter{
 
-	private IModel model;
-	private IView view;
+	private IModel model; // Inizialmente null
+    private IView view;
     private Timer gameTimer;
     
     private boolean isMusicMuted = false;
 	private boolean isSoundMuted = false;
 	
-	public Controller(IModel model, IView view) {
-		this.model = model;
+	public Controller(IView view) {
 		this.view = view;
 		
-		this.view.addArcherListener(e -> attemptToBuildTower(model.getSelectedBuildSlot(), "ARCHER"));
-        this.view.addMageListener(e -> attemptToBuildTower(model.getSelectedBuildSlot(), "MAGE"));
-        this.view.addBarracksListener(e -> attemptToBuildTower(model.getSelectedBuildSlot(), "BARRACKS")); 
-        this.view.addCannonListener(e -> attemptToBuildTower(model.getSelectedBuildSlot(), "CANNON"));
-        this.view.addRallyListener(e ->{
-        	TowerSlot slot = model.getSelectedBuildSlot();
-        			if(slot != null && slot.isOccupied() && slot.getTower().getType() == Tower.BARRACKS_TYPE) {
-        				
-        				model.startSettingRallyPoint(slot);
-        				model.deselectBuildSlot();
-        				view.render(model);
-        			}
+        
+        // Colleghiamo i pulsanti delle torri. 
+        // Nota l'uso di "this.model": cercheranno lo slot sul modello ATTIVO al momento del click.
+        this.view.addArcherListener(e -> attemptToBuildTower(this.model.getSelectedBuildSlot(), "ARCHER"));
+        this.view.addMageListener(e -> attemptToBuildTower(this.model.getSelectedBuildSlot(), "MAGE"));
+        this.view.addBarracksListener(e -> attemptToBuildTower(this.model.getSelectedBuildSlot(), "BARRACKS")); 
+        this.view.addCannonListener(e -> attemptToBuildTower(this.model.getSelectedBuildSlot(), "CANNON"));
+        
+        this.view.addRallyListener(e -> {
+            if(this.model != null) {
+                TowerSlot slot = this.model.getSelectedBuildSlot();
+                if(slot != null && slot.isOccupied() && slot.getTower().getType() == Tower.BARRACKS_TYPE) {
+                    this.model.startSettingRallyPoint(slot);
+                    this.model.deselectBuildSlot();
+                    view.render(this.model);
+                }
+            }
         });
         this.view.addUpgradeListener(e -> {
             model.upgradeSelectedTower();
@@ -46,14 +51,33 @@ public class Controller extends MouseAdapter{
         });
 
         this.view.setStartButtonListener(e -> {
-            if (e.getActionCommand().equals("START")) {
-                // Invece di chiamare solo la view, avviamo il metodo completo!
-                startGame(); 
-            }
+            int levelNumber = Integer.parseInt(e.getActionCommand());
+            startLevel(levelNumber); 
         });
         this.view.addMusicListener(e -> toggleMusic());
         this.view.addSoundListener(e -> toggleSound());
 	}
+	
+	private void startLevel(int levelNumber) {
+        if (gameTimer != null) gameTimer.stop();
+        
+        // QUI il Model viene al mondo per la prima volta
+        this.model = new KingdomRushModel(levelNumber);
+        
+        view.render(this.model);
+        view.switchToGame();
+        
+        gameTimer = new Timer(16, e -> {
+            if (!this.model.isGameOver()) {
+                this.model.updateGame();
+                view.render(this.model);
+            } else {
+                view.render(this.model);
+                ((Timer)e.getSource()).stop();
+            }
+        });
+        gameTimer.start();
+    }
 	
 	public void attachToPanel(JPanel panel) {
         panel.addMouseListener(this);
@@ -62,6 +86,8 @@ public class Controller extends MouseAdapter{
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		
+		if (this.model == null) return;
 	    // 1. Chiediamo alla View la scala attuale
 	    double scaleX = view.getScaleX();
 	    double scaleY = view.getScaleY();
@@ -97,6 +123,8 @@ public class Controller extends MouseAdapter{
 	
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		
+		if (this.model == null) return;
 	    // 1. Chiediamo alla View la scala attuale per il responsive design
 	    double scaleX = view.getScaleX();
 	    double scaleY = view.getScaleY();
@@ -166,27 +194,7 @@ public class Controller extends MouseAdapter{
 			view.showMessage("Failed to build tower. Not enough gold or slot index not available");
 		}
 	}
-    /*view.setStartButtonListener(e -> {
-    if (e.getActionCommand().equals("START")) {
-        view.switchToGame();
-        // Fai partire il timer del gioco qui!
-    }
-    })*/;
-	
-
-    private void startGame() {
-        // 1. Ordina alla View di cambiare pannello
-        view.switchToGame();
-        
-        // 2. Crea e avvia il loop del gioco (20ms = ~50 FPS)
-        if (gameTimer == null) { // Evita di far partire più timer se si clicca più volte
-            gameTimer = new Timer(16, e -> {
-                model.updateGame();      // Il Model aggiorna le posizioni di nemici/torri
-                view.render(model); // La View ridisegna tutto basandosi sul nuovo stato
-            });
-            gameTimer.start();
-        }
-    }
+    
     
     private void toggleMusic() {
         isMusicMuted = !isMusicMuted;

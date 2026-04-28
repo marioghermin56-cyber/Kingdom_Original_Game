@@ -23,29 +23,19 @@ public class KingdomRushModel implements IModel{
 	private TowerSlot hoveredSlot = null;
 	private List<EnemyPath> enemyPath;
 	
-	public KingdomRushModel(int startingHealth, int startingGold) {
-		this.playerHealth = startingHealth;
-		this.gold = startingGold;
+	public KingdomRushModel(int levelNumber) {
+		Level data = LevelManager.getLevel(levelNumber);
+		this.playerHealth = data.getStartingHealth();
+		this.gold = data.getStartingGold();
 		this.gameOver = false;
 		this.enemies = new ArrayList<>();
 		this.projectiles = new ArrayList();
-		this.waves = new ArrayList<>();
+		this.waves = data.getWaves();
 		this.activeSoldiers = new ArrayList<>();
-		this.enemyPath = MapLoader.loadPathsFromTMX("/assets/maps/tail_6.tmx");
-		this.slots = MapLoader.loadSlotsFromTMX("/assets/maps/tail_6.tmx");
+		this.enemyPath = MapLoader.loadPathsFromTMX(data.getTmxPath());
+		this.slots = MapLoader.loadSlotsFromTMX(data.getTmxPath());
 		
-		Wave wave = new Wave(120); 
-		wave.addEnemyGroup(Enemy.GOBLIN_TYPE, 10, 0); // Sentiero 0
-		wave.addEnemyGroup(Enemy.ORC_TYPE, 10, 1);    // Sentiero 1
-		wave.shuffleEnemies(); 
-		waves.add(wave);
 		
-		// ONDATA 2: Attacco da due lati!
-		Wave wave2 = new Wave(50);
-		wave2.addEnemyGroup(Enemy.SCORPION_TYPE, 4, 0); // 4 scorpioni da sopra (percorso 0)
-		wave2.addEnemyGroup(Enemy.SCORPION_TYPE, 4, 1); // 4 scorpioni da sotto (percorso 1)
-		wave2.shuffleEnemies(); 
-		waves.add(wave2);
 	}
 	
 	@Override

@@ -19,6 +19,8 @@ public class SwingView implements IView {
     private JButton archerButton, mageButton, cannonButton, barracksButton, rallyButton, upgradeButton, musicButton, soundButton;
     private Font font, mainFont, winLoseFont;
     
+    private JButton btnLevel1, btnLevel2;
+    
     private BufferedImage playIcon, menuImage;
     private BufferedImage musicOnIcon, musicOffIcon, soundOnIcon, soundOffIcon;
     
@@ -136,11 +138,8 @@ public class SwingView implements IView {
     
     @Override
     public void setStartButtonListener(ActionListener listener) {
-        for (Component c : menuPanel.getComponents()) {
-            if (c instanceof JButton && "START".equals(((JButton) c).getActionCommand())) {
-                ((JButton) c).addActionListener(listener);
-            }
-        }
+    	if (btnLevel1 != null) btnLevel1.addActionListener(listener);
+        if (btnLevel2 != null) btnLevel2.addActionListener(listener);
     }
     
     private ImageIcon scaleIcon(BufferedImage img, int width, int height) {
@@ -206,12 +205,14 @@ public class SwingView implements IView {
         menuPanel.add(audioPanel, gbc);
 
         // --- BOTTONE START (Al centro) ---
-        JButton startButton = createTransparentButton();
-        playIcon = loadImage("/assets/background/button_play.png");
-        if (playIcon != null) startButton.setIcon(new ImageIcon(playIcon));
-        else startButton.setText("START");
-        startButton.setActionCommand("START");
-        startButton.setVisible(true);
+        JPanel levelsPanel = new JPanel(new GridLayout(2, 1, 0, 20)); // 2 righe, 1 colonna, spazio di 20px
+        levelsPanel.setOpaque(false); // Rendiamo trasparente il contenitore
+
+        btnLevel1 = createLevelButton("GIOCA LIVELLO 1", "1");
+        btnLevel2 = createLevelButton("GIOCA LIVELLO 2", "2");
+
+        levelsPanel.add(btnLevel1);
+        levelsPanel.add(btnLevel2);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -219,7 +220,7 @@ public class SwingView implements IView {
         gbc.weighty = 0.9;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(0, 0, 0, 0);
-        menuPanel.add(startButton, gbc);
+        menuPanel.add(levelsPanel, gbc);
     }
     
     @Override
@@ -258,6 +259,32 @@ public class SwingView implements IView {
         button.setForeground(Color.WHITE);
         button.setFont(new Font("Arial", Font.BOLD, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Aggiunto cursore a manina per comodità!
+        return button;
+    }
+    
+    private JButton createLevelButton(String text, String command) {
+        // Creiamo un bottone personalizzato che disegna lo sfondo da solo
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                g.setColor(new Color(0, 0, 0, 180)); // Il nostro nero trasparente
+                g.fillRect(0, 0, getWidth(), getHeight());
+                super.paintComponent(g); // Disegna il testo normalmente
+            }
+        };
+        
+        button.setFont(mainFont != null ? mainFont.deriveFont(24f) : new Font("Arial", Font.BOLD, 24));
+        button.setForeground(Color.WHITE);
+        
+        // I 3 comandi fondamentali per evitare glitch visivi!
+        button.setOpaque(false); 
+        button.setContentAreaFilled(false); 
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        
+        button.setActionCommand(command); 
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(300, 60));
         return button;
     }
 
@@ -356,6 +383,8 @@ public class SwingView implements IView {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
+            if (model == null) return;
+            
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
