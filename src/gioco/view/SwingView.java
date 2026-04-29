@@ -327,8 +327,8 @@ public class SwingView implements IView {
             });
             
             // Proiettili, Sfondo e Barre
-            background = loadImage("/assets/background/tail_6.png");
-            backgroundTop = loadImage("/assets/background/tail_6_2.png");
+            background = loadImage("/assets/background/colfioritoBack.png");
+            backgroundTop = loadImage("/assets/background/colfioritoUP.png");
             projectileAssets.put(Projectile.ARCHER_PROJECTILE, loadImage("/assets/ARCHER_TOWER/37.png"));
             projectileAssets.put(Projectile.MAGE_PROJECTILE, loadImage("/assets/MAGE_TOWER/10.png"));
             projectileAssets.put(Projectile.CANNON_PROJECTILE, loadImage("/assets/CANNON_TOWER/29.png"));
