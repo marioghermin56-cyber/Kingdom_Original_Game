@@ -47,9 +47,7 @@ public class SwingView implements IView {
         rallyButton.setOpaque(true);
         rallyButton.setBackground(new Color(0, 0, 255, 150));
         
-        upgradeButton = createTransparentButton();
-        upgradeButton.setOpaque(true);
-        upgradeButton.setBackground(new Color(255, 215, 0, 200));
+        upgradeButton = createUpgradeButton();
 
         // 2. SOLO ORA CREIAMO IL PANNELLO!
         gamePanel = new GamePanel();
@@ -259,6 +257,7 @@ public class SwingView implements IView {
         button.setForeground(Color.WHITE);
         button.setFont(new Font("Arial", Font.BOLD, 14));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Aggiunto cursore a manina per comodità!
+        button.setRolloverEnabled(false);
         return button;
     }
     
@@ -298,6 +297,7 @@ public class SwingView implements IView {
         private BufferedImage[] soldierFrames = new BufferedImage[20];
         private BufferedImage[] soldierFightFrames = new BufferedImage[20];
         private BufferedImage[] soldierIdleFrames = new BufferedImage[20];
+        private BufferedImage radialMenuImage;
         
         public GamePanel() {
             this.setPreferredSize(new Dimension(1056,864 ));
@@ -306,11 +306,7 @@ public class SwingView implements IView {
         }
         
         private void loadAssets() {
-            // Icone dei bottoni
-            archerButton.setIcon(new ImageIcon(loadImage("/assets/background/75_2.png")));
-            mageButton.setIcon(new ImageIcon(loadImage("/assets/background/100_9.png")));
-            cannonButton.setIcon(new ImageIcon(loadImage("/assets/background/125_9.png")));
-            barracksButton.setIcon(new ImageIcon(loadImage("/assets/background/75-1_9.png")));
+        	radialMenuImage = loadImage("/assets/background/slotMenu6.png");
             
             // Torri
             towerAssets.put(Tower.ARCHER_TYPE, new BufferedImage[]{
@@ -407,9 +403,27 @@ public class SwingView implements IView {
             
             drawSlots(g2d);
             drawProjectiles(g2d);
-            g2d.setTransform(oldTransform);
             
+            g2d.setTransform(oldTransform);
             drawUI(g2d);
+            
+            TowerSlot selectedSlot = model.getSelectedBuildSlot();
+            if (selectedSlot != null && !selectedSlot.isOccupied() && radialMenuImage != null) {
+                // 1. Centro logico
+                int logicalCx = selectedSlot.getX() + (selectedSlot.getWidth() / 2);
+                int logicalCy = selectedSlot.getY() + (selectedSlot.getHeight() / 2);
+                
+                // 2. Centro su schermo
+                int screenCx = (int) (logicalCx * scaleX);
+                int screenCy = (int) (logicalCy * scaleY);
+                
+                // IL SEGRETO: Usiamo la scala minore tra X e Y per tenerlo sempre 1:1 !
+                double uniformScale = Math.min(scaleX, scaleY);
+                int screenMenuSize = (int) (180 * uniformScale); 
+                
+                g2d.drawImage(radialMenuImage, screenCx - (screenMenuSize / 2), screenCy - (screenMenuSize / 2), screenMenuSize, screenMenuSize, null);
+            }
+            
             updateMenuButton();
         }
         
@@ -497,45 +511,72 @@ public class SwingView implements IView {
         private void updateMenuButton() {
             TowerSlot slot = model.getSelectedBuildSlot();
             
-            archerButton.setVisible(false);
-            mageButton.setVisible(false);
-            cannonButton.setVisible(false);
-            barracksButton.setVisible(false);
-            rallyButton.setVisible(false);
-            upgradeButton.setVisible(false);
+            // 1. SE NON C'È NESSUNO SLOT APERTO, NASCONDI TUTTO E FERMATI QUI
+            if (slot == null) {
+                archerButton.setVisible(false);
+                mageButton.setVisible(false);
+                cannonButton.setVisible(false);
+                barracksButton.setVisible(false);
+                rallyButton.setVisible(false);
+                upgradeButton.setVisible(false);
+                return;
+            }
             
-            if (slot == null) return;
+            int logicalCx = slot.getX() + (slot.getWidth() / 2);
+            int logicalCy = slot.getY() + (slot.getHeight() / 2);
+            int screenCx = (int) (logicalCx * scaleX);
+            int screenCy = (int) (logicalCy * scaleY);
             
-            int x = (int) (slot.getX() * scaleX); 
-            int y = (int) (slot.getY() * scaleY); 
+            int menuSize = 150;
+            double uniformScale = Math.min(scaleX, scaleY);
+            int halfSize = (int) ((menuSize / 2.0) * uniformScale);
 
             if (!slot.isOccupied()) {
-                int w = (int) (200 * scaleX);
-                int h = (int) (200 * scaleY);
-                
-                archerButton.setBounds(x - w - (int)(15*scaleX), y - h - (int)(15*scaleY), w, h);
-                mageButton.setBounds(x + (int)(15*scaleX), y - h - (int)(15*scaleY), w, h);
-                cannonButton.setBounds(x - w - (int)(15*scaleX), y + (int)(15*scaleY), w, h);
-                barracksButton.setBounds(x + (int)(15*scaleX), y + (int)(15*scaleY), w, h);
+                // 2. SE IL MENU È VUOTO: Mostra le armi, nascondi gli upgrade
+                archerButton.setBounds(screenCx - halfSize, screenCy - halfSize, halfSize, halfSize); 
+                barracksButton.setBounds(screenCx, screenCy - halfSize, halfSize, halfSize);       
+                mageButton.setBounds(screenCx - halfSize, screenCy, halfSize, halfSize);           
+                cannonButton.setBounds(screenCx, screenCy, halfSize, halfSize);                 
                 
                 archerButton.setVisible(true);
                 mageButton.setVisible(true);
                 cannonButton.setVisible(true);
                 barracksButton.setVisible(true);
+                
+                rallyButton.setVisible(false);
+                upgradeButton.setVisible(false);
             } else {
+                // 3. SE C'È GIÀ UNA TORRE: Nascondi le armi, gestisci gli upgrade
+                archerButton.setVisible(false);
+                mageButton.setVisible(false);
+                cannonButton.setVisible(false);
+                barracksButton.setVisible(false);
+                
                 Tower tower = slot.getTower();
                 
                 if (tower.getType() == Tower.BARRACKS_TYPE) {
-                    rallyButton.setBounds(x - 15, y + 40, 30, 30);
+                    // Usiamo screenCx per centrarlo perfettamente e screenCy per abbassarlo
+                    rallyButton.setBounds(screenCx - 15, screenCy + 40, 30, 30);
                     rallyButton.setVisible(true);
+                } else {
+                    rallyButton.setVisible(false);
                 }
                 
                 if (tower.canUpgrade()) {
-                    upgradeButton.setBounds(x - 45, y - 60, 90, 30);
-                    upgradeButton.setText("UP: " + tower.getUpgradeCost() + "g");
-                    upgradeButton.setBackground(model.getGold() < tower.getUpgradeCost() ? 
-                        new Color(255, 0, 0, 150) : new Color(255, 215, 0, 200));
+                	int btnWidth = 170;
+                    int btnHeight = 35;
+                    
+                	upgradeButton.setBounds(screenCx - (btnWidth / 2), screenCy + 15, btnWidth, btnHeight);
+                    upgradeButton.setText("UPGRADE: " + tower.getUpgradeCost() + "g");
+                    
+                    // Colori più belli: Rosso scuro se non hai soldi, Verde prato se li hai
+                    Color affordableColor = new Color(104, 163, 87, 220); // verde foresta
+                    Color unaffordableColor = new Color(160, 70, 63, 220); // Rosso Mattone
+                    
+                    upgradeButton.setBackground(model.getGold() < tower.getUpgradeCost() ? unaffordableColor : affordableColor);
                     upgradeButton.setVisible(true);
+                }else {
+                    upgradeButton.setVisible(false);
                 }
             }
         }
@@ -545,35 +586,38 @@ public class SwingView implements IView {
                 double visualTilt = Math.toRadians(70); 
                 double maxArcHeight;
                 
-                if(p.getType() == Projectile.ARCHER_PROJECTILE) {
-                    maxArcHeight = 60.0;
-                } else if(p.getType() == Projectile.MAGE_PROJECTILE) {
-                    maxArcHeight = 10.0;
-                } else if(p.getType() == Projectile.CANNON_PROJECTILE) {
-                    maxArcHeight = 120.0;
-                } else {
-                    maxArcHeight = 40.0;
+                switch (p.getType()) {
+                    case Projectile.ARCHER_PROJECTILE -> maxArcHeight = 60.0;
+                    case Projectile.MAGE_PROJECTILE -> maxArcHeight = 10.0;
+                    case Projectile.CANNON_PROJECTILE -> maxArcHeight = 120.0;
+                    default -> maxArcHeight = 40.0;
                 }
                 
-                double lx = p.getX() ;
-                double ly = p.getY() ;
-
+                // Ora getTotalDistanceToTravel() è dinamico![cite: 8]
                 double totalDist = p.getTotalDistanceToTravel(); 
                 double distTraveled = p.getDistanceTraveled();
+                
+                // 3. APPIATTIMENTO DELLA PARABOLA
+                // Se la distanza è minore di 150 pixel, riduciamo l'altezza massima dell'arco.
+                // Questo evita che la freccia faccia "voli pindarici" altissimi per percorrere 2 metri.
+                double arcScale = Math.min(1.0, totalDist / 150.0);
+                double adjustedArcHeight = maxArcHeight * arcScale;
 
-                double progress = Math.min(1.0, distTraveled / totalDist);
-                if (Double.isNaN(progress)) progress = 1.0; 
+                double progress = distTraveled / totalDist;
+                if (Double.isNaN(progress) || progress > 1.0) progress = 1.0; 
 
+                // Usiamo adjustedArcHeight invece di maxArcHeight
                 double parabolaFactor = 4.0 * progress * (1.0 - progress);
-                double currentHeightOffset = maxArcHeight * parabolaFactor;
+                double currentHeightOffset = adjustedArcHeight * parabolaFactor;
 
-                int vx = (int)lx;
-                int vy = (int)(ly - currentHeightOffset); 
+                int vx = (int)p.getX();
+                int vy = (int)(p.getY() - currentHeightOffset);
+
+                boolean facingRight = p.isFacingRight();
+                double tiltDirection = facingRight ? 1.0 : -1.0;
 
                 double baseAngle = p.getAngle();
-                double tiltDirection = (Math.cos(baseAngle) >= 0) ? 1.0 : -1.0;
-    
-                double arcTilt = (1.0 - 2.0 * progress) * visualTilt*tiltDirection;
+                double arcTilt = (1.0 - 2.0 * progress) * visualTilt * tiltDirection;
                 double finalRenderAngle = baseAngle - arcTilt; 
 
                 BufferedImage img = projectileAssets.get(p.getType());
@@ -582,10 +626,18 @@ public class SwingView implements IView {
                     AffineTransform oldTransform = g.getTransform();
                     g.translate(vx, vy); 
                     g.rotate(finalRenderAngle);
-                    g.drawImage(img, -14, -4, 14, 8, null); 
+                    
+                    if (!facingRight) {
+                        // Specchio per direzione sinistra (pancia in basso)
+                        g.drawImage(img, -14, 4, 14, -8, null); 
+                    } else {
+                        // Normale per direzione destra
+                        g.drawImage(img, -14, -4, 14, 8, null); 
+                    }
+                    
                     g.setTransform(oldTransform);
                 } else {
-                    g.setColor(p.getType() == Tower.ARCHER_TYPE ? new Color(34, 139, 34) : new Color(128, 0, 128)); 
+                    g.setColor(Color.RED); 
                     g.fillOval(vx - 5, vy - 5, 10, 10); 
                 }
             }
@@ -708,11 +760,11 @@ public class SwingView implements IView {
             Color menuColor = new Color(236, 204, 120);
             Color titleColor = new Color(75, 83, 32);
             
-            drawShadowText(g, "VITE: " + model.getPlayerHealth(), 1160, 40, menuColor, 5);
-            drawShadowText(g, "ORO: " + model.getGold(), 1160, 70, menuColor, 5);
+            drawShadowText(g, "VITE: " + model.getPlayerHealth(), 15, 40, menuColor, 5);
+            drawShadowText(g, "ORO: " + model.getGold(), 15, 70, menuColor, 5);
             
             int ondataMostrata = Math.min(model.getCurrentWaveNumber(), model.getTotalWaves());
-            drawShadowText(g, "ONDATA: " + ondataMostrata + "/" + model.getTotalWaves(), 1160, 100, menuColor, 5);
+            drawShadowText(g, "ONDATA: " + ondataMostrata + "/" + model.getTotalWaves(), 15, 100, menuColor, 5);
             
             g.setFont(winLoseFont);
             if (model.getCurrentWaveNumber() > model.getTotalWaves() && model.getActiveEnemies().isEmpty()) {
@@ -722,6 +774,43 @@ public class SwingView implements IView {
                 drawShadowText(g, "GAME OVER", 520, 380, titleColor, 8);
             }
         }
-        
     }
-}
+        
+        private JButton createUpgradeButton() {
+            JButton button = new JButton() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    // Attiviamo l'antialiasing per non avere bordi seghettati
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    // Disegniamo lo sfondo arrotondato usando il colore che gli passiamo dinamicamente
+                    g2.setColor(getBackground());
+                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15); // 15 è la rotondità degli angoli
+
+                    // Disegniamo un bordino bianco per farlo risaltare
+                    g2.setColor(Color.WHITE);
+                    g2.setStroke(new BasicStroke(2f)); // Spessore del bordo
+                    g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 15, 15);
+
+                    g2.dispose();
+                    super.paintComponent(g); // Questo disegna il testo ("UP: 100g") sopra a tutto
+                }
+            };
+            
+            // Rimuoviamo gli stili brutti di default
+            button.setOpaque(false);
+            button.setContentAreaFilled(false);
+            button.setBorderPainted(false);
+            button.setFocusPainted(false);
+            
+            // Impostiamo il testo in bianco con un bel font cicciotto
+            button.setForeground(Color.WHITE);
+            // Se hai mainFont caricato, usa quello, altrimenti Arial
+            button.setFont(mainFont != null ? mainFont.deriveFont(16f) : new Font("Arial", Font.BOLD, 16)); 
+            button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            button.setHorizontalTextPosition(SwingConstants.CENTER);
+            
+            return button;
+        }
+    }

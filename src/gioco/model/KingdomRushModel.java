@@ -25,7 +25,6 @@ public class KingdomRushModel implements IModel{
 	
 	public KingdomRushModel(int levelNumber) {
 		Level data = LevelManager.getLevel(levelNumber);
-		this.playerHealth = data.getStartingHealth();
 		this.gold = data.getStartingGold();
 		this.gameOver = false;
 		this.enemies = new ArrayList<>();
@@ -34,8 +33,6 @@ public class KingdomRushModel implements IModel{
 		this.activeSoldiers = new ArrayList<>();
 		this.enemyPath = MapLoader.loadPathsFromTMX(data.getTmxPath());
 		this.slots = MapLoader.loadSlotsFromTMX(data.getTmxPath());
-		
-		
 	}
 	
 	@Override
@@ -151,7 +148,7 @@ public class KingdomRushModel implements IModel{
 			gold -= cost;
 			
 			if(towerType.equals("ARCHER")) {
-				slots.setTower(new Tower(3,150,3, Tower.ARCHER_TYPE));
+				slots.setTower(new Tower(3,220,3, Tower.ARCHER_TYPE));
 			}else if(towerType.equals("MAGE")) {
 				slots.setTower(new Tower(8,130,5,Tower.MAGE_TYPE));
 			}else if(towerType.equals("CANNON")) {
@@ -294,27 +291,38 @@ public class KingdomRushModel implements IModel{
 						tower.setCooldown(240);
 					}				
 				
-				} else {
-					if (tower.canShoot()) {
-						for (Enemy enemy : enemies) {
-							// Controlliamo che il nemico non sia già in procinto di morire
-							if (!enemy.isDead() && !enemiesToRemove.contains(enemy)) {
-								double distance = Math.hypot(enemy.getX() - slot.getX(), enemy.getY() - slot.getY());
-								if (distance <= tower.getRange()) {
-									if(tower.getType() == Tower.ARCHER_TYPE) {
-										projectilesToAdd.add(new Projectile(slot.getX() + 16, slot.getY() - 12, 3.0, tower.getDamage(), enemy, tower.getType()));
-									}else if(tower.getType()== tower.MAGE_TYPE) {
-										projectilesToAdd.add(new Projectile(slot.getX() + 16, slot.getY() + 4, 2.0, tower.getDamage(), enemy, tower.getType()));
-									}else if(tower.getType() == tower.CANNON_TYPE) {
-										projectilesToAdd.add(new Projectile(slot.getX() + 16, slot.getY() + 16, 1.5, tower.getDamage(), enemy, tower.getType()));
-									}
-									tower.resetCooldown();
-									break;
-								}
-							}
-						}
-					}
-					tower.decreaseCooldown(); 
+				} else { // Se è una torre d'attacco (non Caserma)
+				    if (tower.canShoot()) {
+				        for (Enemy enemy : enemies) {
+				            if (!enemy.isDead() && !enemiesToRemove.contains(enemy)) {
+				            	// CALCOLO DAL CENTRO (Sincronizza logica e grafica)
+				                double towerCenterX = slot.getX() + (slot.getWidth() / 2.0);
+				                double towerCenterY = slot.getY() + (slot.getHeight() / 2.0);
+				                double enemyCenterX = enemy.getX() + 18.0; 
+				                double enemyCenterY = enemy.getY() + 18.0;
+				                
+				                double distance = Math.hypot(enemyCenterX - towerCenterX, enemyCenterY - towerCenterY);
+				                
+				                if (distance <= tower.getRange()) {
+				                    
+				                    // Ripristiniamo la partenza dalla punta della torre per la grafica
+				                    double spawnX = towerCenterX; 
+				                    double spawnY = slot.getY() - 15; 
+				                    
+				                    if(tower.getType() == Tower.ARCHER_TYPE) {
+				                        projectilesToAdd.add(new Projectile(spawnX, spawnY, 4.0, tower.getDamage(), enemy, tower.getType()));
+				                    } else if(tower.getType() == Tower.MAGE_TYPE) {
+				                        projectilesToAdd.add(new Projectile(spawnX, spawnY + 5, 3.0, tower.getDamage(), enemy, tower.getType()));
+				                    } else if(tower.getType() == Tower.CANNON_TYPE) {
+				                        projectilesToAdd.add(new Projectile(spawnX, slot.getY() + 16, 2.5, tower.getDamage(), enemy, tower.getType()));
+				                    }
+				                    tower.resetCooldown();
+				                    break;
+				                }
+				            }
+				        }
+				    }
+				    tower.decreaseCooldown(); 
 				}
 			}
 		}
