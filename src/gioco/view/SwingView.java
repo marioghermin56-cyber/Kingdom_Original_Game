@@ -700,7 +700,7 @@ public class SwingView implements IView {
                     g.setColor(Color.RED); 
                     g.fillOval(sx - 12, sy - 12, 24, 24);
                 }
-                drawHealthBar(g, sx - 20, sy - 25, s.getHealth(), s.getMaxHealth());
+                drawHealthBar(g, shadowX, sy - 25, s.getHealth(), s.getMaxHealth());
             }
         }
 
@@ -743,7 +743,7 @@ public class SwingView implements IView {
                 }
                 
                 // Barra della vita sempre dritta sopra al nemico
-                drawHealthBar(g, ex - 15, ey - 25, e.getHealth(), e.getMaxHealth());
+                drawHealthBar(g, shadowX, ey - 25, e.getHealth(), e.getMaxHealth());
             }
         }
         
