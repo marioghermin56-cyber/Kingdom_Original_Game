@@ -61,8 +61,13 @@ public class Controller extends MouseAdapter{
 	private void startLevel(int levelNumber) {
         if (gameTimer != null) gameTimer.stop();
         
-        // QUI il Model viene al mondo per la prima volta
         this.model = new KingdomRushModel(levelNumber);
+        
+        // --- NUOVO: Fai partire la musica di gioco se non è in muto! ---
+        if (!isMusicMuted) {
+            // Inserisci qui il nome del file .wav della tua battaglia!
+            gioco.utils.SoundManager.playMusic("/assets/audio/audioMenu2.wav"); 
+        }
         
         view.render(this.model);
         view.switchToGame();
@@ -198,11 +203,25 @@ public class Controller extends MouseAdapter{
     
     private void toggleMusic() {
         isMusicMuted = !isMusicMuted;
-        view.updateMusicIcon(isMusicMuted);
+        view.updateMusicIcon(isMusicMuted); 
+        
+        if (isMusicMuted) {
+            gioco.utils.SoundManager.pauseMusic();
+        } else {
+            // Il Controller sa sempre dove ci troviamo:
+            // Se model è null, significa che siamo ancora nel menu!
+            if (this.model == null) {
+                gioco.utils.SoundManager.playMusic("/assets/audio/audioMenu.wav");
+            } else {
+                // Altrimenti siamo in gioco: mettici lo stesso file che hai usato in startLevel!
+                gioco.utils.SoundManager.playMusic("/assets/audio/audioMenu2.wav"); 
+            }
+        }
     }
 
     private void toggleSound() {
         isSoundMuted = !isSoundMuted;
         view.updateSoundIcon(isSoundMuted);
     }
+    
 }

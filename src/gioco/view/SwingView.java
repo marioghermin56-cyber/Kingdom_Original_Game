@@ -111,6 +111,18 @@ public class SwingView implements IView {
     }
     
     @Override
+    public void updateSoundIcon(boolean isMuted) {
+        if (isMuted) {
+            if (soundOffIcon != null) soundButton.setIcon(scaleIcon(soundOffIcon, 60, 60));
+            else soundButton.setText("SOUND OFF");
+        } else {
+            if (soundOnIcon != null) soundButton.setIcon(scaleIcon(soundOnIcon, 60, 60));
+            else soundButton.setText("SOUND ON");
+        }
+        soundButton.repaint();
+    }
+    
+    @Override
     public void updateMusicIcon(boolean isMuted) {
         if (isMuted) {
             if (musicOffIcon != null) musicButton.setIcon(scaleIcon(musicOffIcon, 60, 60));
@@ -122,17 +134,6 @@ public class SwingView implements IView {
         musicButton.repaint();
     }
 
-    @Override
-    public void updateSoundIcon(boolean isMuted) {
-        if (isMuted) {
-            if (soundOffIcon != null) soundButton.setIcon(scaleIcon(soundOffIcon, 60, 60));
-            else soundButton.setText("SOUND OFF");
-        } else {
-            if (soundOnIcon != null) soundButton.setIcon(scaleIcon(soundOnIcon, 60, 60));
-            else soundButton.setText("SOUND ON");
-        }
-        soundButton.repaint();
-    }
     
     @Override
     public void setStartButtonListener(ActionListener listener) {
@@ -152,6 +153,7 @@ public class SwingView implements IView {
         // Caricamento icone audio
         musicOnIcon = loadImage("/assets/background/button_music.png");
         musicOffIcon = loadImage("/assets/background/button_music_off.png");
+        
         soundOnIcon = loadImage("/assets/background/button_sound.png");
         soundOffIcon = loadImage("/assets/background/button_sound_off.png");
         
@@ -184,16 +186,20 @@ public class SwingView implements IView {
         else musicButton.setText("MUSIC ON");
         musicButton.setActionCommand("MUSIC");
         musicButton.setVisible(true);
-
+        
+        
         soundButton = createTransparentButton();
         if (soundOnIcon != null) soundButton.setIcon(scaleIcon(soundOnIcon, 60, 60));
         else soundButton.setText("SOUND ON");
         soundButton.setActionCommand("SOUND");
         soundButton.setVisible(true);
+        
+       
 
         audioPanel.add(musicButton);
         audioPanel.add(soundButton);
-
+       
+        
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.weightx = 1.0;
@@ -201,6 +207,8 @@ public class SwingView implements IView {
         gbc.anchor = GridBagConstraints.NORTHEAST;
         gbc.insets = new Insets(20, 0, 0, 20); 
         menuPanel.add(audioPanel, gbc);
+        
+        gioco.utils.SoundManager.playMusic("/assets/audio/audioMenu.wav");
 
         // --- BOTTONE START (Al centro) ---
         JPanel levelsPanel = new JPanel(new GridLayout(2, 1, 0, 20)); // 2 righe, 1 colonna, spazio di 20px
@@ -236,6 +244,7 @@ public class SwingView implements IView {
     public void switchToGame() {
         cardLayout.show(mainContainer, "GAME");
     }
+    
     private BufferedImage loadImage(String path) {
         try {
             return ImageIO.read(getClass().getResourceAsStream(path));
