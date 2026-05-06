@@ -301,7 +301,7 @@ public class SwingView implements IView {
         private Map<Integer, BufferedImage[]> towerAssets = new HashMap<>();
         private Map<Integer, BufferedImage> projectileAssets = new HashMap<>();
         private Map<Integer, BufferedImage[]> enemyAssets = new HashMap<>();
-        private BufferedImage background, backgroundTop, lifespan, redBar;
+        private BufferedImage lifespan, redBar;
         private BufferedImage hoveredSlot;
         private BufferedImage[] soldierFrames = new BufferedImage[20];
         private BufferedImage[] soldierFightFrames = new BufferedImage[20];
@@ -332,8 +332,7 @@ public class SwingView implements IView {
             });
             
             // Proiettili, Sfondo e Barre
-            background = loadImage("/assets/background/colfioritoBack.png");
-            backgroundTop = loadImage("/assets/background/colfioritoUP.png");
+           
             projectileAssets.put(Projectile.ARCHER_PROJECTILE, loadImage("/assets/ARCHER_TOWER/37.png"));
             projectileAssets.put(Projectile.MAGE_PROJECTILE, loadImage("/assets/MAGE_TOWER/10.png"));
             projectileAssets.put(Projectile.CANNON_PROJECTILE, loadImage("/assets/CANNON_TOWER/29.png"));
@@ -399,15 +398,16 @@ public class SwingView implements IView {
             AffineTransform oldTransform = g2d.getTransform();
             g2d.scale(scaleX, scaleY);
 
-            if (background != null) {
-                g2d.drawImage(background, 0, 0, 1056, 864, null); 
+            Level currentLevel = model.getCurrentLevel();
+            if (currentLevel.getBackLayerImage() != null) {
+                g2d.drawImage(currentLevel.getBackLayerImage(), 0, 0, 1056, 864, null); 
             }
             
             drawEnemies(g2d);
             drawSoldiers(g2d);
             
-            if (backgroundTop != null) {
-                g2d.drawImage(backgroundTop, 0, 0, 1056, 864, null); 
+            if (currentLevel.getTopLayerImage() != null) {
+                g2d.drawImage(currentLevel.getTopLayerImage(), 0, 0, 1056, 864, null); 
             }
             
             drawSlots(g2d);

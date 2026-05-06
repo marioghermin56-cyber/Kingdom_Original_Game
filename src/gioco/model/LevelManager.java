@@ -14,7 +14,7 @@ public class LevelManager {
 	}
 	
 	public static Level createLevel1() {
-		Level level = new Level("/assets/maps/mappaColfiorito.tmx", 20, 250);
+		Level level = new Level("/assets/maps/mappaColfiorito.tmx", 20, 250, "/assets/SFONDI_MAPPE/backColfiorito.png", "/assets/SFONDI_MAPPE/topColfiorito.png");
 		
 		Wave wave = new Wave(120); 
 		wave.addEnemyGroup(Enemy.GOBLIN_TYPE, 10, 0); // Sentiero 0
@@ -33,7 +33,7 @@ public class LevelManager {
 	}
 	
 	public static Level createLevel2() {
-		Level level = new Level("/assets/maps/mappaLago.tmx", 20, 150);
+		Level level = new Level("/assets/maps/mappaLago.tmx", 20, 150, "/assets/SFONDI_MAPPE/backLago.png", "/assets/SFONDI_MAPPE/topLago.png");
 		
 		Wave wave = new Wave(120); 
 		wave.addEnemyGroup(Enemy.GOBLIN_TYPE, 15, 0); // Sentiero 0

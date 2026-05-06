@@ -22,11 +22,14 @@ public class KingdomRushModel implements IModel{
 	private TowerSlot activeBarracksSlot = null;
 	private TowerSlot hoveredSlot = null;
 	private List<EnemyPath> enemyPath;
+	private Level currentLevel;
 	
 	public KingdomRushModel(int levelNumber) {
 		Level data = LevelManager.getLevel(levelNumber);
+		this.currentLevel = data;
 		this.gold = data.getStartingGold();
 		this.gameOver = false;
+		this.playerHealth = data.getStartingHealth();
 		this.enemies = new ArrayList<>();
 		this.projectiles = new ArrayList();
 		this.waves = data.getWaves();
@@ -34,6 +37,16 @@ public class KingdomRushModel implements IModel{
 		this.enemyPath = MapLoader.loadPathsFromTMX(data.getTmxPath());
 		this.slots = MapLoader.loadSlotsFromTMX(data.getTmxPath());
 	}
+	
+	@Override
+	public void setCurrentLevel(Level level) {
+        this.currentLevel = level;
+    }
+	
+	@Override
+	public Level getCurrentLevel() {
+        return currentLevel;
+    }	
 	
 	@Override
 	public List<EnemyPath> getMapPaths() {

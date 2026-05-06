@@ -52,5 +52,9 @@ public interface IModel {
 	
 	void upgradeSelectedTower();
 	
+	void setCurrentLevel(Level level);
+	
+	Level getCurrentLevel();
+	
 	
 }

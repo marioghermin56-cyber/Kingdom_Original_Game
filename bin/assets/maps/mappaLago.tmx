@@ -104,7 +104,7 @@
 40,39,40,32,0,0,0,2147483686,2147483685,37,38
 </data>
  </layer>
- <layer id="6" name="slots" width="11" height="9" visible="0" locked="1">
+ <layer id="6" name="slots" width="11" height="9" locked="1">
   <data encoding="csv">
 0,0,0,29,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,
