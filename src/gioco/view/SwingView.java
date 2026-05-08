@@ -19,7 +19,7 @@ public class SwingView implements IView {
     private JButton archerButton, mageButton, cannonButton, barracksButton, rallyButton, upgradeButton, musicButton, soundButton;
     private Font font, mainFont, winLoseFont;
     
-    private JButton btnLevel1, btnLevel2;
+    private JButton btnLevel1, btnLevel2, btnLevel3;
     
     private BufferedImage playIcon, menuImage;
     private BufferedImage musicOnIcon, musicOffIcon, soundOnIcon, soundOffIcon;
@@ -139,6 +139,7 @@ public class SwingView implements IView {
     public void setStartButtonListener(ActionListener listener) {
     	if (btnLevel1 != null) btnLevel1.addActionListener(listener);
         if (btnLevel2 != null) btnLevel2.addActionListener(listener);
+        if (btnLevel3 != null) btnLevel3.addActionListener(listener);
     }
     
     private ImageIcon scaleIcon(BufferedImage img, int width, int height) {
@@ -214,11 +215,13 @@ public class SwingView implements IView {
         JPanel levelsPanel = new JPanel(new GridLayout(2, 1, 0, 20)); // 2 righe, 1 colonna, spazio di 20px
         levelsPanel.setOpaque(false); // Rendiamo trasparente il contenitore
 
-        btnLevel1 = createLevelButton("GIOCA LIVELLO 1", "1");
-        btnLevel2 = createLevelButton("GIOCA LIVELLO 2", "2");
+        btnLevel1 = createLevelButton("COLFIORITO", "1");
+        btnLevel2 = createLevelButton("TRASIMENO", "2");
+        btnLevel3 = createLevelButton("NORCIA", "3");
 
         levelsPanel.add(btnLevel1);
         levelsPanel.add(btnLevel2);
+        levelsPanel.add(btnLevel3);
 
         gbc.gridx = 0;
         gbc.gridy = 1;

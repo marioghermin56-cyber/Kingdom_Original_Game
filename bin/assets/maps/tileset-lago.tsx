@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.12.0" name="tileset-lago" tilewidth="96" tileheight="96" tilecount="48" columns="0">
+<tileset version="1.10" tiledversion="1.12.0" name="tileset-lago" tilewidth="96" tileheight="96" tilecount="42" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image source="../../../../../OneDrive/Desktop/png Modificati/tileset-lago/1.png" width="96" height="96"/>
@@ -126,23 +126,5 @@
  </tile>
  <tile id="41">
   <image source="../../../../../OneDrive/Desktop/png Modificati/tileset-lago/42.png" width="96" height="96"/>
- </tile>
- <tile id="42">
-  <image source="../../../../../OneDrive/Desktop/png Modificati/tileset-lago/43.png" width="96" height="96"/>
- </tile>
- <tile id="43">
-  <image source="../../../../../OneDrive/Desktop/png Modificati/tileset-lago/44.png" width="96" height="96"/>
- </tile>
- <tile id="44">
-  <image source="../../../../../OneDrive/Desktop/png Modificati/tileset-lago/45.png" width="96" height="96"/>
- </tile>
- <tile id="45">
-  <image source="../../../../../OneDrive/Desktop/png Modificati/tileset-lago/46.png" width="96" height="96"/>
- </tile>
- <tile id="46">
-  <image source="../../../../../OneDrive/Desktop/png Modificati/tileset-lago/47.png" width="96" height="96"/>
- </tile>
- <tile id="47">
-  <image source="../../../../../OneDrive/Desktop/png Modificati/tileset-lago/48.png" width="96" height="96"/>
  </tile>
 </tileset>

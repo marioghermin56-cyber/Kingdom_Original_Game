@@ -161,11 +161,11 @@ public class KingdomRushModel implements IModel{
 			gold -= cost;
 			
 			if(towerType.equals("ARCHER")) {
-				slots.setTower(new Tower(3,220,3, Tower.ARCHER_TYPE));
+				slots.setTower(new Tower(3,220,2, Tower.ARCHER_TYPE));
 			}else if(towerType.equals("MAGE")) {
-				slots.setTower(new Tower(8,130,5,Tower.MAGE_TYPE));
+				slots.setTower(new Tower(8,130,3,Tower.MAGE_TYPE));
 			}else if(towerType.equals("CANNON")) {
-				slots.setTower(new Tower(15,150,7,Tower.CANNON_TYPE));
+				slots.setTower(new Tower(15,150,5,Tower.CANNON_TYPE));
 			}else if(towerType.equals("BARRACKS")) {
 				slots.setTower(new Tower(0,150,90,Tower.BARRACKS_TYPE));
 			}

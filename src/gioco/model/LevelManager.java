@@ -8,13 +8,15 @@ public class LevelManager {
 				return createLevel1();
 			case 2:
 				return createLevel2();
+			case 3:
+				return createLevel3();
 			default:
-				return createLevel1();
+					return null;
 		}
 	}
 	
 	public static Level createLevel1() {
-		Level level = new Level("/assets/maps/mappaColfiorito.tmx", 20, 250, "/assets/SFONDI_MAPPE/backColfiorito.png", "/assets/SFONDI_MAPPE/topColfiorito.png");
+		Level level = new Level("/assets/maps/mappaColfiorito.tmx", 20, 400, "/assets/SFONDI_MAPPE/backColfiorito.png", "/assets/SFONDI_MAPPE/topColfiorito.png");
 		
 		Wave wave = new Wave(120); 
 		wave.addEnemyGroup(Enemy.GOBLIN_TYPE, 10, 0); // Sentiero 0
@@ -47,6 +49,22 @@ public class LevelManager {
 		wave2.addEnemyGroup(Enemy.SCORPION_TYPE, 20, 1); // 4 scorpioni da sotto (percorso 1)
 		wave2.shuffleEnemies(); 
 		level.addWave(wave2);
+		
+		return level;
+	}
+	
+	public static Level createLevel3() {
+		Level level = new Level("/assets/maps/mappaNorcia.tmx", 20, 250, "/assets/SFONDI_MAPPE/backNorcia.png", "/assets/SFONDI_MAPPE/topNorcia.png");
+		
+		
+		Wave wave1 = new Wave(80);
+		wave1.addEnemyGroup(Enemy.ORC_TYPE, 3, 3);
+		wave1.addEnemyGroup(Enemy.ORC_TYPE, 3, 1);
+		wave1.addEnemyGroup(Enemy.ORC_TYPE, 3, 2);
+		wave1.addEnemyGroup(Enemy.ORC_TYPE, 3, 0);
+		wave1.shuffleEnemies();
+		level.addWave(wave1);
+		
 		
 		return level;
 	}

@@ -12,14 +12,16 @@ public class LevelSelectionPanel extends JPanel {
 		setBackground(Color.DARK_GRAY);
 		
 		JPanel buttonContainer = new JPanel();
-		buttonContainer.setLayout(new GridLayout(2,1, 0, 20));//3 righe, 1 colonna, spazio vericale di 20px
+		buttonContainer.setLayout(new GridLayout(3,1, 0, 20));//3 righe, 1 colonna, spazio vericale di 20px
 		buttonContainer.setOpaque(false);//rende il pannello trasparente
 		
 		JButton level1Button = createLevelButton("Gioca Livello 1", "1", levelSelectionListener);
 		JButton level2Button = createLevelButton("Gioca Livello 2", "2", levelSelectionListener);
+		JButton level3Button = createLevelButton("Gioca Livello 3", "3", levelSelectionListener);
 		
 		buttonContainer.add(level1Button);
 		buttonContainer.add(level2Button);
+		buttonContainer.add(level3Button);
 		
 		add(buttonContainer);
 	}

@@ -10,14 +10,14 @@ public class Tower {
 	public static final int MAGE_TYPE = 2;
 	public static final int BARRACKS_TYPE = 4;
 	public static final int CANNON_TYPE = 3;
-	public static final int ARCHER_BASE_COST = 75;
+	public static final int ARCHER_BASE_COST = 70;
     public static final int MAGE_BASE_COST = 100;
-    public static final int BARRACKS_BASE_COST = 75;
+    public static final int BARRACKS_BASE_COST = 70;
     public static final int CANNON_BASE_COST = 125;
 	private int type;
 	private Point rallyPoint;
 	private boolean initialTrainingDone = false;
-	private int lvl = 1;
+	private int lvl;
 	private int maxLvl = 3;
 	
 	public Tower(int damage, int range, int cooldown, int type) {
@@ -26,6 +26,7 @@ public class Tower {
 		this.cooldown = cooldown;
 		this.currentCooldown = 0;
 		this.type = type;
+		this.lvl  = 1;
 	}
 	
 	public int getLvl() {
@@ -57,7 +58,7 @@ public class Tower {
 		lvl++;
 		
 		if (this.type == ARCHER_TYPE) {
-            this.damage += 2;      
+            this.damage += 15;      
             this.cooldown -= 1; 
             this.range += 25;
         } 
@@ -67,7 +68,7 @@ public class Tower {
             this.range += 15;
         } 
         else if (this.type == CANNON_TYPE) {
-            this.damage += 8;     
+            this.damage += 15;     
             this.range += 10;        
         }
         else if (this.type == BARRACKS_TYPE) {
@@ -76,18 +77,6 @@ public class Tower {
 	}
 	
 	public int getDamage() {
-		if (this.type == ARCHER_TYPE) {
-            this.damage = 3;
-        } 
-        else if (this.type == MAGE_TYPE) {
-            this.damage = 5;
-        } 
-        else if (this.type == CANNON_TYPE) {
-            this.damage = 8;           
-        }
-        else if (this.type == BARRACKS_TYPE) {
-            this.damage = (int)(Math.random() * 4) + 2;
-        }
 		return this.damage;
 	}
 	

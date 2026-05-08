@@ -69,8 +69,8 @@ public class Projectile {
             return;
         }
 
-        double distanceX = (target.getX() + 18) - this.x;
-        double distanceY = (target.getY() + 18) - this.y;
+        double distanceX = (target.getX() + 9) - this.x;
+        double distanceY = (target.getY() + 9) - this.y;
         double distanceFromCenter = Math.hypot(distanceX, distanceY);
 
         // IL FIX E' QUI: Raggio ridotto a 3.0
@@ -91,12 +91,12 @@ public class Projectile {
                 if (!enemy.isDead()) {
                     double dist = Math.hypot(enemy.getX() - target.getX(), enemy.getY() - target.getY());
                     if (dist <= explosionRadius) {
-                        enemy.takeDamage(damage);
+                        enemy.takeDamage(this.damage);
                     }
                 }
             }
         } else {
-            target.takeDamage(damage); 
+            target.takeDamage(this.damage); 
         }
     }
 
