@@ -56,6 +56,24 @@ public class Controller extends MouseAdapter{
         });
         this.view.addMusicListener(e -> toggleMusic());
         this.view.addSoundListener(e -> toggleSound());
+        
+        this.view.addPauseListener(e -> {
+        	model.togglePause();
+        	view.render(model);
+        });
+        
+        view.addRestartListener(e -> {
+            // Ricarica lo stesso livello usando il numero salvato
+        	int levelNumber = model.getCurrentLevelNumber();
+            startLevel(levelNumber); 
+        });
+        
+        view.addQuitListener(e -> {
+            // Ferma il timer e torna al CardLayout "MENU"
+            if (gameTimer != null) gameTimer.stop();
+            gioco.utils.SoundManager.playMusic("/assets/audio/audioMenu.wav");
+            view.switchToMenu(); 
+        });
 	}
 	
 	private void startLevel(int levelNumber) {

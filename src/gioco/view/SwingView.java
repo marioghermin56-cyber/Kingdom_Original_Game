@@ -17,6 +17,7 @@ public class SwingView implements IView {
     private GamePanel gamePanel;
     
     private JButton archerButton, mageButton, cannonButton, barracksButton, rallyButton, upgradeButton, musicButton, soundButton;
+    private JButton pauseBtn, restartBtn, quitBtn;
     private Font font, mainFont, winLoseFont;
     
     private JButton btnLevel1, btnLevel2, btnLevel3;
@@ -27,6 +28,7 @@ public class SwingView implements IView {
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainContainer = new JPanel(cardLayout);
     private JPanel menuPanel;
+    private JPanel pausePanel;
     private double scaleX = 1.0;
     private double scaleY = 1.0;
     
@@ -47,13 +49,40 @@ public class SwingView implements IView {
         rallyButton.setOpaque(true);
         rallyButton.setBackground(new Color(0, 0, 255, 150));
         
+        pauseBtn = createTransparentButton();
+        pauseBtn.setIcon(scaleIcon(loadImage("/assets/background/button_pause.png"), 40, 40)); 
+        pauseBtn.setVisible(true);
+        
+        pausePanel = new JPanel(new GridBagLayout());
+        pausePanel.setBounds(0, 0, 1056, 864);
+        pausePanel.setBackground(new Color(0, 0, 0, 150));
+        pausePanel.setVisible(false);
+        
+        //PANNELLO DEI BOTTONI SU PAUSEPANEL
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 30, 10));
+        buttonPanel.setOpaque(false); //SFONDO INVISIBILE COSI SI INTEGRA CON IL PAUSEPANEL
+        //CREAZIONE DEI BOTTONI RESTART E QUIT
+        restartBtn = createTransparentButton();
+        restartBtn.setIcon(scaleIcon(loadImage("/assets/background/restart_button.png"), 117, 70)); 
+        restartBtn.setVisible(true);
+        quitBtn = createTransparentButton();
+        quitBtn.setIcon(scaleIcon(loadImage("/assets/background/quit_button.png"), 117, 70)); 
+        quitBtn.setVisible(true);
+        // Impostiamo una dimensione fissa per il blocco dei bottoni
+        buttonPanel.setPreferredSize(new Dimension(250, 120));
+        buttonPanel.add(restartBtn);
+        buttonPanel.add(quitBtn);
+        // I bottoni restart e quit su pausePanel    
+        pausePanel.add(buttonPanel);     
+        //CREAZIONE BOTTONE UPGRADE      
         upgradeButton = createUpgradeButton();
-
-        // 2. SOLO ORA CREIAMO IL PANNELLO!
+        //  SOLO ORA CREIAMO IL PANNELLO!
         gamePanel = new GamePanel();
         gamePanel.setLayout(null); 
-
-        // 3. ORA POSSIAMO AGGIUNGERLI AL PANNELLO
+        // AGGIUNTA BOTTONI PAUSA
+        gamePanel.add(pausePanel);
+        gamePanel.add(pauseBtn);
+        //  ORA POSSIAMO AGGIUNGERLI AL PANNELLO
         gamePanel.add(archerButton);
         gamePanel.add(mageButton);
         gamePanel.add(cannonButton);
@@ -72,6 +101,27 @@ public class SwingView implements IView {
     
     public double getScaleX() { return scaleX; }
     public double getScaleY() { return scaleY; }
+    
+    
+    @Override
+    public void switchToMenu() {
+        // Sfrutta il CardLayout e il mainContainer che hai già configurato in cima alla classe
+        cardLayout.show(mainContainer, "MENU");
+    }
+    
+    @Override
+    public void addPauseListener(ActionListener listener) {
+    	pauseBtn.addActionListener(listener);
+    }
+    @Override
+    public void addRestartListener(ActionListener listener) {
+    	restartBtn.addActionListener(listener);
+    }
+    @Override
+    public void addQuitListener(ActionListener listener) {
+    	quitBtn.addActionListener(listener);
+    }
+    
     
     @Override
     public void addUpgradeListener(ActionListener listener) {
@@ -397,6 +447,10 @@ public class SwingView implements IView {
 
             scaleX = getWidth() / 1056.0;
             scaleY = getHeight() / 864.0;
+            
+            pauseBtn.setBounds((int)(980 * scaleX), (int)(20 * scaleY), 50, 50);
+            pausePanel.setVisible(model.isPaused());
+            pausePanel.setBounds(0, 0, (int)(1056 * scaleX), (int)(864 * scaleY));
 
             AffineTransform oldTransform = g2d.getTransform();
             g2d.scale(scaleX, scaleY);

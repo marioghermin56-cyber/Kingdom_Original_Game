@@ -10,6 +10,12 @@ public interface IView {
 	double getScaleX();
 	double getScaleY();
 	
+	// --- Metodi Pausa ---
+	void addPauseListener(ActionListener listener);
+	void addRestartListener(ActionListener listener);
+	void addQuitListener(ActionListener listener);
+	void switchToMenu();
+	
 	// --- Metodi Audio ---
 	void addMusicListener(ActionListener listener);
 	void addSoundListener(ActionListener listener);

@@ -23,10 +23,13 @@ public class KingdomRushModel implements IModel{
 	private TowerSlot hoveredSlot = null;
 	private List<EnemyPath> enemyPath;
 	private Level currentLevel;
+	private boolean paused = false;
+	private int currentLevelNumber;
 	
 	public KingdomRushModel(int levelNumber) {
 		Level data = LevelManager.getLevel(levelNumber);
 		this.currentLevel = data;
+		this.currentLevelNumber = levelNumber;
 		this.gold = data.getStartingGold();
 		this.gameOver = false;
 		this.playerHealth = data.getStartingHealth();
@@ -36,6 +39,21 @@ public class KingdomRushModel implements IModel{
 		this.activeSoldiers = new ArrayList<>();
 		this.enemyPath = MapLoader.loadPathsFromTMX(data.getTmxPath());
 		this.slots = MapLoader.loadSlotsFromTMX(data.getTmxPath());
+	}
+	
+	@Override
+	public void togglePause() {
+		this.paused = !this.paused;
+	}
+	
+	@Override
+	public boolean isPaused() {
+		return this.paused;
+	}
+	
+	@Override
+	public int getCurrentLevelNumber() {
+		return this.currentLevelNumber;
 	}
 	
 	@Override
@@ -203,7 +221,7 @@ public class KingdomRushModel implements IModel{
 	
 	@Override
 	public void updateGame() {
-		if (gameOver) return;
+		if (gameOver || paused) return;
 
 		// 1. ECCO LE LISTE TEMPORANEE! (Vengono create qui dentro ad ogni "tick")
 		List<Soldier> soldiersToAdd = new ArrayList<>();

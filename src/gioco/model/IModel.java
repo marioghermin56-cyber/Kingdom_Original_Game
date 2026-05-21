@@ -56,5 +56,10 @@ public interface IModel {
 	
 	Level getCurrentLevel();
 	
+	int getCurrentLevelNumber();
+	
+	void togglePause();
+	
+    boolean isPaused();	
 	
 }

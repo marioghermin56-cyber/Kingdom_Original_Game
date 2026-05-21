@@ -30,6 +30,23 @@ public class ConsoleView implements IView {
 	}
 	
 	@Override
+	public void addPauseListener(ActionListener listener) {
+		
+	};
+	@Override
+	public void addRestartListener(ActionListener listener) {
+		
+	};
+	@Override
+	public void addQuitListener(ActionListener listener) {
+		
+	};
+	@Override
+	public void switchToMenu() {
+		
+	};
+	
+	@Override
 	public double getScaleX() {
 		return 1.0;
 	}
