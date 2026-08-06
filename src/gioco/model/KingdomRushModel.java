@@ -329,8 +329,9 @@ public class KingdomRushModel implements IModel{
 				            	// CALCOLO DAL CENTRO (Sincronizza logica e grafica)
 				                double towerCenterX = slot.getX() + (slot.getWidth() / 2.0);
 				                double towerCenterY = slot.getY() + (slot.getHeight() / 2.0);
-				                double enemyCenterX = enemy.getX() + 18.0; 
-				                double enemyCenterY = enemy.getY() + 18.0;
+				                // MODIFICA QUI: Rimosso il + 18.0. e.getX() e e.getY() sono già il centro
+				                double enemyCenterX = enemy.getX(); 
+				                double enemyCenterY = enemy.getY();
 				                
 				                double distance = Math.hypot(enemyCenterX - towerCenterX, enemyCenterY - towerCenterY);
 				                
@@ -516,4 +517,3 @@ public class KingdomRushModel implements IModel{
 	
 	
 }
-

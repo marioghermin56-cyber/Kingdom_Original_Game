@@ -122,4 +122,10 @@ public class ConsoleView implements IView {
 	public void switchToGame() {
 		// Non implementato per la console
 	}
+
+	// --- METODO AGGIUNTO PER CORRISPONDERE A IView ---
+	@Override
+	public void updateUnlockedLevels(int maxUnlockedLevel) {
+		// Non implementato per la console
+	}
 }

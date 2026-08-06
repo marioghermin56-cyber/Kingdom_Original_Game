@@ -14,6 +14,9 @@ public class Projectile {
     public static final int ARCHER_PROJECTILE = 1;
     public static final int MAGE_PROJECTILE = 2;
     public static final int CANNON_PROJECTILE = 3;
+    
+    private double actualDistanceTraveled = 0.0; 
+    private double dynamicTotalDistance = 0.0;   
     private double lastCalculatedAngle = 0.0;
     private final boolean facingRight;
 
@@ -28,10 +31,13 @@ public class Projectile {
         this.startX = x;
         this.startY = y;
         
-        this.facingRight = (target.getX() + 18) >= x;
+        // RIMOSSO IL +18: e.getX() è già il centro perfetto!
+        this.facingRight = target.getX() >= x;
 
-        // Velocità adattiva
-        double initialDist = Math.hypot((target.getX() + 18) - startX, (target.getY() + 18) - startY);
+        // RIMOSSI I +18 per calcolare la distanza iniziale corretta
+        double initialDist = Math.hypot(target.getX() - startX, target.getY() - startY);
+        this.dynamicTotalDistance = initialDist;
+
         if (initialDist < 120) {
             this.currentSpeed = Math.max(1.5, projectileSpeed * (initialDist / 120.0));
         } else {
@@ -39,28 +45,19 @@ public class Projectile {
         }
     }
 
-    public boolean isFacingRight() { return facingRight; }
 
-    public double getAngle() {
-        if (target != null) {
-            double distanceX = (target.getX() + 18) - this.x;
-            double distanceY = (target.getY() + 18) - this.y;
-            if (Math.hypot(distanceX, distanceY) > 5.0) {
-                lastCalculatedAngle = Math.atan2(distanceY, distanceX);
-            }
-        }
-        return lastCalculatedAngle;
+    public boolean isFacingRight() { 
+        return facingRight; 
     }
 
+    // RIMUOSSI COMPLETAMENTE getAngle() E lastCalculatedAngle
+
     public double getDistanceTraveled() { 
-        return Math.hypot(x - startX, y - startY); 
+        return actualDistanceTraveled; 
     }
 
     public double getTotalDistanceToTravel() {
-        if (target != null && !target.isDead()) {
-            return Math.hypot((target.getX() + 18) - startX, (target.getY() + 18) - startY);
-        }
-        return Math.max(1.0, Math.hypot(x - startX, y - startY));
+        return dynamicTotalDistance;   
     }
 
     public void move(List<Enemy> allEnemies) {
@@ -69,18 +66,25 @@ public class Projectile {
             return;
         }
 
-        double distanceX = (target.getX() + 9) - this.x;
-        double distanceY = (target.getY() + 9) - this.y;
+        double targetX = target.getX();
+        double targetY = target.getY();
+
+        double distanceX = targetX - this.x;
+        double distanceY = targetY - this.y;
         double distanceFromCenter = Math.hypot(distanceX, distanceY);
 
-        // IL FIX E' QUI: Raggio ridotto a 3.0
-        // Costringe la freccia ad arrivare al cuore matematico prima di sparire.
-        if (distanceFromCenter <= 3.0 || distanceFromCenter < this.currentSpeed) {
+        // IL FIX È QUI: Aumentato il raggio di collisione da 3.0 a 15.0
+        // Ora la freccia registra l'impatto appena tocca il bordo esterno del nemico,
+        // evitando di trapassarlo visivamente.
+        if (distanceFromCenter <= 15.0 || distanceFromCenter < this.currentSpeed) {
             this.hit = true;
             processHit(allEnemies);
         } else {
             this.x += (distanceX / distanceFromCenter) * this.currentSpeed;
             this.y += (distanceY / distanceFromCenter) * this.currentSpeed;
+            
+            this.actualDistanceTraveled += this.currentSpeed;
+            this.dynamicTotalDistance = this.actualDistanceTraveled + distanceFromCenter;
         }
     }
 

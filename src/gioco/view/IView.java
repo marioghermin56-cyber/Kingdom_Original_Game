@@ -33,5 +33,7 @@ public interface IView {
 	// --- Metodi Gestione View ---
 	void setStartButtonListener(ActionListener listener);
 	void switchToGame();
-
+	
+	// --- NUOVO: Metodo per la progressione dei livelli ---
+	void updateUnlockedLevels(int maxUnlockedLevel);
 }
