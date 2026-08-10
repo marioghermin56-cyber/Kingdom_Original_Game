@@ -20,10 +20,15 @@ public class SwingView implements IView {
     private JButton pauseBtn, restartBtn, quitBtn;
     private Font font, mainFont, winLoseFont;
     
+    private JButton btnStart;
+    private JPanel levelsPanel;
+    private javax.swing.Timer flashTimer; 
+    
     private JButton btnLevel1, btnLevel2, btnLevel3;
+    private JButton btnBackMenu; 
     
     private BufferedImage playIcon, menuImage;
-    private BufferedImage musicOnIcon, musicOffIcon, soundOnIcon, soundOffIcon;
+    private BufferedImage musicOnIcon, musicOffIcon, soundOnIcon, soundOffIcon, homeIcon, infoIcon; 
     
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainContainer = new JPanel(cardLayout);
@@ -38,7 +43,6 @@ public class SwingView implements IView {
         frame.setResizable(true); 
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 
-        // 1. PRIMA CREIAMO I BOTTONI E IL GAMEPANEL
         archerButton = createTransparentButton();
         mageButton = createTransparentButton();
         barracksButton = createTransparentButton();
@@ -56,7 +60,6 @@ public class SwingView implements IView {
         gamePanel = new GamePanel();
         gamePanel.setLayout(null); 
 
-        // 2. PANNELLO DI PAUSA
         pausePanel = new JPanel(new GridBagLayout());
         pausePanel.setBounds(0, 0, 1056, 864);
         pausePanel.setBackground(new Color(0, 0, 0, 150));
@@ -75,10 +78,8 @@ public class SwingView implements IView {
         buttonPanel.add(quitBtn);
         pausePanel.add(buttonPanel);     
 
-        // CREAZIONE BOTTONE UPGRADE      
         upgradeButton = createUpgradeButton();
 
-        // 3. AGGIUNGIAMO TUTTO AL GAMEPANEL IN SICUREZZA
         gamePanel.add(pausePanel);
         gamePanel.add(pauseBtn);
         gamePanel.add(archerButton);
@@ -102,6 +103,15 @@ public class SwingView implements IView {
     
     @Override
     public void switchToMenu() {
+        if (btnStart != null && levelsPanel != null) {
+            btnStart.setVisible(true);
+            levelsPanel.setVisible(false);
+            if (btnBackMenu != null) btnBackMenu.setVisible(false); 
+            
+            if (flashTimer != null && !flashTimer.isRunning()) {
+                flashTimer.start();
+            }
+        }
         cardLayout.show(mainContainer, "MENU");
     }
     
@@ -113,14 +123,14 @@ public class SwingView implements IView {
         
         if (btnLevel2 != null) {
             btnLevel2.setEnabled(maxUnlockedLevel >= 2);
-            btnLevel2.setText(maxUnlockedLevel >= 2 ? "LIVELLO 2" : "LUCCHETTO - LIVELLO 2");
+            btnLevel2.setText(maxUnlockedLevel >= 2 ? "LIVELLO 2" : "LIVELLO 2");
             btnLevel2.setForeground(maxUnlockedLevel >= 2 ? Color.WHITE : Color.GRAY);
             btnLevel2.setCursor(new Cursor(maxUnlockedLevel >= 2 ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
         }
         
         if (btnLevel3 != null) {
             btnLevel3.setEnabled(maxUnlockedLevel >= 3);
-            btnLevel3.setText(maxUnlockedLevel >= 3 ? "LIVELLO 3" : "LUCCHETTO - LIVELLO 3");
+            btnLevel3.setText(maxUnlockedLevel >= 3 ? "LIVELLO 3" : "LIVELLO 3");
             btnLevel3.setForeground(maxUnlockedLevel >= 3 ? Color.WHITE : Color.GRAY);
             btnLevel3.setCursor(new Cursor(maxUnlockedLevel >= 3 ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
         }
@@ -225,6 +235,7 @@ public class SwingView implements IView {
         musicOffIcon = loadImage("/assets/background/button_music_off.png");
         soundOnIcon = loadImage("/assets/background/button_sound.png");
         soundOffIcon = loadImage("/assets/background/button_sound_off.png");
+        homeIcon = loadImage("/assets/background/button_left.png"); 
         
         menuPanel = new JPanel(new GridBagLayout()) {
             @Override
@@ -234,7 +245,7 @@ public class SwingView implements IView {
                     g.drawImage(menuImage, 0, 0, getWidth(), getHeight(), null);
                 }
                 if (font != null) {
-                    g.setFont(font.deriveFont(60f));
+                    g.setFont(font.deriveFont(100f));
                     g.setColor(new Color(0, 0, 0));
                     String title = "KINGDOM RUSH";
                     int x = (getWidth() - g.getFontMetrics().stringWidth(title)) / 2;
@@ -245,6 +256,35 @@ public class SwingView implements IView {
         
         GridBagConstraints gbc = new GridBagConstraints();
 
+        // --- PANNELLO SUPERIORE (Unisce Audio a destra e Back a sinistra) ---
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setOpaque(false);
+
+        // Sinistra: Bottone Home
+        JPanel backContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
+        backContainer.setOpaque(false);
+        
+        btnBackMenu = createTransparentButton();
+        if (homeIcon != null) {
+            btnBackMenu.setIcon(scaleIcon(homeIcon, 60, 60));
+        } else {
+            // Se l'immagine manca, usa il simbolo Unicode della casetta provvisoriamente!
+            btnBackMenu.setText("\u2302"); 
+            btnBackMenu.setFont(new Font("Arial", Font.PLAIN, 50));
+        }
+        btnBackMenu.setVisible(false); // Inizialmente nascosto
+        
+        btnBackMenu.addActionListener(e -> {
+            btnStart.setVisible(true);
+            levelsPanel.setVisible(false);
+            btnBackMenu.setVisible(false); 
+            if (flashTimer != null && !flashTimer.isRunning()) {
+                flashTimer.start();
+            }
+        });
+        backContainer.add(btnBackMenu);
+
+        // Destra: Pannello Audio
         JPanel audioPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         audioPanel.setOpaque(false);
 
@@ -262,35 +302,114 @@ public class SwingView implements IView {
 
         audioPanel.add(musicButton);
         audioPanel.add(soundButton);
+
+        // Assembliamo il topPanel
+        topPanel.add(backContainer, BorderLayout.WEST);
+        topPanel.add(audioPanel, BorderLayout.EAST);
        
-        gbc.gridx = 1;
+        gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.gridwidth = 2;
         gbc.weightx = 1.0;
         gbc.weighty = 0.1; 
-        gbc.anchor = GridBagConstraints.NORTHEAST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTH;
         gbc.insets = new Insets(20, 0, 0, 20); 
-        menuPanel.add(audioPanel, gbc);
+        menuPanel.add(topPanel, gbc);
         
         gioco.utils.SoundManager.playMusic("/assets/audio/audioMenu.wav");
 
-        JPanel levelsPanel = new JPanel(new GridLayout(3, 1, 0, 20)); 
+        // --- BOTTONE START E LIVELLI (Al centro) ---
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        centerPanel.setOpaque(false);
+        
+        // --- PANNELLO LIVELLI E NUOVO BOTTONE PICCOLO ---
+        levelsPanel = new JPanel(new GridBagLayout()); 
         levelsPanel.setOpaque(false); 
+        levelsPanel.setVisible(false); 
+
+        // Raggruppiamo i 3 bottoni grandi dei livelli
+        JPanel buttonsGrid = new JPanel(new GridLayout(3, 1, 0, 20));
+        buttonsGrid.setOpaque(false);
 
         btnLevel1 = createLevelButton("LIVELLO 1", "1");
         btnLevel2 = createLevelButton("LIVELLO 2", "2");
         btnLevel3 = createLevelButton("LIVELLO 3", "3");
 
-        levelsPanel.add(btnLevel1);
-        levelsPanel.add(btnLevel2);
-        levelsPanel.add(btnLevel3);
+        buttonsGrid.add(btnLevel1);
+        buttonsGrid.add(btnLevel2);
+        buttonsGrid.add(btnLevel3);
 
+        GridBagConstraints gbcLevels = new GridBagConstraints();
+        gbcLevels.gridx = 0;
+        gbcLevels.gridy = 0;
+        gbcLevels.insets = new Insets(0, 0, 80, 0); // 30px di spazio tra i livelli e il bottone sotto
+        levelsPanel.add(buttonsGrid, gbcLevels);
+
+     // --- CREAZIONE E AGGIUNTA DEL NUOVO BOTTONE (60x60) ---
+        JButton btnExtra = createTransparentButton();
+        btnExtra.setPreferredSize(new Dimension(60, 60));
+        
+        // 1. Carichi l'immagine
+        BufferedImage infoIcon = loadImage("/assets/background/button_info.png");
+        
+        // 2. LA APPLICHI AL BOTTONE 
+        if (infoIcon != null) {
+            btnExtra.setIcon(scaleIcon(infoIcon, 60, 60));
+        } else {
+            System.out.println("ATTENZIONE: Immagine button_info.png non trovata nel percorso specificato!");
+        }
+        
+        btnExtra.setVisible(true);
+
+        gbcLevels.gridy = 1;
+        gbcLevels.insets = new Insets(0, 0, 0, 0);
+        levelsPanel.add(btnExtra, gbcLevels); // <-- TI MANCAVA QUESTA RIGA!
+
+        // --- CREAZIONE DELLO START ---
+        btnStart = createOvalStartButton("START", "START");
+        
+        flashTimer = new javax.swing.Timer(600, e -> {
+            if (btnStart.getForeground().getAlpha() == 255) {
+                btnStart.setForeground(new Color(255, 255, 255, 0));
+            } else {
+                btnStart.setForeground(Color.WHITE);
+            }
+        });
+        flashTimer.start(); 
+
+        btnStart.addActionListener(e -> {
+            flashTimer.stop(); 
+            btnStart.setForeground(Color.WHITE); 
+            btnStart.setVisible(false);   
+            levelsPanel.setVisible(true); 
+            btnBackMenu.setVisible(true); 
+        });
+
+     // Creiamo dei vincoli specifici per gli elementi dentro il centerPanel
+        GridBagConstraints gbcInner = new GridBagConstraints();
+        gbcInner.gridx = 0;
+        gbcInner.gridy = 0;
+        
+        // 1. Aggiungiamo il bottone START senza alterarne la posizione
+        gbcInner.insets = new Insets(0, 0, 0, 0);
+        centerPanel.add(btnStart, gbcInner);
+
+        // 2. Aggiungiamo i livelli con un margine superiore per spingerli in basso
+        // Se scendono troppo poco, aumenta il 120 (es. 150 o 180). Se scendono troppo, abbassalo!
+        gbcInner.insets = new Insets(220, 0, 0, 0); 
+        centerPanel.add(levelsPanel, gbcInner);
+
+        // Posizioniamo il contenitore centrale nel menu
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
+        gbc.weightx = 1.0;
         gbc.weighty = 0.9;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        menuPanel.add(levelsPanel, gbc);
+        gbc.insets = new Insets(-120, 0, 0, 0); // Sposta in basso tutto il blocco (Start e Livelli)
+        menuPanel.add(centerPanel, gbc);
     }
     
     @Override
@@ -355,6 +474,38 @@ public class SwingView implements IView {
         button.setFocusPainted(false);
         button.setActionCommand(command); 
         button.setPreferredSize(new Dimension(300, 60));
+        
+        return button;
+    }
+    
+    private JButton createOvalStartButton(String text, String command) {
+        JButton button = new JButton(text) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                // Attiviamo l'antialiasing per rendere i bordi dell'ovale perfetti e lisci
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Colore di sfondo semitrasparente come gli altri
+                g2.setColor(new Color(0, 0, 0, 180)); 
+                // Disegniamo l'ovale invece del rettangolo!
+                g2.fillOval(0, 0, getWidth(), getHeight());
+                
+                g2.dispose();
+                super.paintComponent(g); 
+            }
+        };
+        
+        button.setFont(mainFont != null ? mainFont.deriveFont(28f) : new Font("Arial", Font.BOLD, 60));
+        button.setForeground(Color.WHITE); 
+        button.setOpaque(false); 
+        button.setContentAreaFilled(false); 
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setActionCommand(command); 
+        // Dimensioni regolate per rendere l'ovale ben proporzionato
+        button.setPreferredSize(new Dimension(200, 64)); 
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
         return button;
     }
