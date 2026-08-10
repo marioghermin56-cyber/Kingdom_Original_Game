@@ -48,10 +48,7 @@ public class SwingView implements IView {
         barracksButton = createTransparentButton();
         cannonButton = createTransparentButton();
         
-        rallyButton = createTransparentButton();
-        rallyButton.setText("MOVE");
-        rallyButton.setOpaque(true);
-        rallyButton.setBackground(new Color(0, 0, 255, 150));
+        rallyButton = createUpgradeButton();
         
         pauseBtn = createTransparentButton();
         pauseBtn.setIcon(scaleIcon(loadImage("/assets/background/button_pause.png"), 40, 40)); 
@@ -756,7 +753,14 @@ public class SwingView implements IView {
                 Tower tower = slot.getTower();
                 
                 if (tower.getType() == Tower.BARRACKS_TYPE) {
-                    rallyButton.setBounds(screenCx - 15, screenCy + 40, 30, 30);
+                	int btnWidth = 85;
+                    int btnHeight = 35;
+                    
+                	rallyButton.setBounds(screenCx - (btnWidth / 2), screenCy - 85, btnWidth, btnHeight);
+                	rallyButton.setFont(mainFont != null ? mainFont.deriveFont(16f) : new Font("Arial", Font.BOLD, 16));
+                    rallyButton.setText("MOVE");
+                    Color moveColor = new Color(103, 76, 62, 220);
+                    rallyButton.setBackground(moveColor);
                     rallyButton.setVisible(true);
                 } else {
                     rallyButton.setVisible(false);
