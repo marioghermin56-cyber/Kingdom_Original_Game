@@ -20,14 +20,14 @@ public class Controller extends MouseAdapter{
 	private IModel model; 
     private IView view;
     private Timer gameTimer;
-    private int maxUnlockedLevel = 1; 
+    private int maxUnlockedLevel; 
     
     private boolean isMusicMuted = false;
 	private boolean isSoundMuted = false;
 	
 	public Controller(IView view) {
 		this.view = view;
-		
+		this.maxUnlockedLevel = gioco.utils.SaveManager.loadProgress();
         this.view.updateUnlockedLevels(maxUnlockedLevel);
         
         this.view.addArcherListener(e -> attemptToBuildTower(this.model.getSelectedBuildSlot(), "ARCHER"));
@@ -98,6 +98,8 @@ public class Controller extends MouseAdapter{
                     int currentLvl = model.getCurrentLevelNumber();
                     if (currentLvl >= maxUnlockedLevel) {
                         maxUnlockedLevel = currentLvl + 1;
+                        
+                        gioco.utils.SaveManager.saveProgress(maxUnlockedLevel);
                     }
                     view.render(this.model); 
                     ((Timer)e.getSource()).stop(); 
