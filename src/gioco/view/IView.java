@@ -35,5 +35,6 @@ public interface IView {
 	void switchToGame();
 	
 	// --- NUOVO: Metodo per la progressione dei livelli ---
-	void updateUnlockedLevels(int maxUnlockedLevel);
+	// Cambia questa riga:
+	void updateUnlockedLevels(int maxUnlockedLevel, java.util.Map<Integer, Integer> levelStars);
 }

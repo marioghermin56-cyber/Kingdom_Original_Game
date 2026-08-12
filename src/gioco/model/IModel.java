@@ -6,6 +6,8 @@ public interface IModel {
 	
 	int getPlayerHealth();
 	
+	int getMaxPlayerHealth();
+	
 	int getGold();
 	
 	void setRallyPoint(int mouseX, int mouseY);

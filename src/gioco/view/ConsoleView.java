@@ -125,7 +125,7 @@ public class ConsoleView implements IView {
 
 	// --- METODO AGGIUNTO PER CORRISPONDERE A IView ---
 	@Override
-	public void updateUnlockedLevels(int maxUnlockedLevel) {
+	public void updateUnlockedLevels(int maxUnlockedLevel, java.util.Map<Integer, Integer> levelStars) {
 		// Non implementato per la console
 	}
 }

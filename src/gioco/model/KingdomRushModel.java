@@ -469,6 +469,11 @@ public class KingdomRushModel implements IModel{
 	}
 	
 	@Override
+	public int getMaxPlayerHealth() {
+		return currentLevel.getStartingHealth();
+	}
+	
+	@Override
 	public int getGold() {
 		return gold;
 	}

@@ -21,6 +21,7 @@ public class Controller extends MouseAdapter{
     private IView view;
     private Timer gameTimer;
     private int maxUnlockedLevel; 
+    private java.util.Map<Integer, Integer> levelStars;
     
     private boolean isMusicMuted = false;
 	private boolean isSoundMuted = false;
@@ -28,7 +29,12 @@ public class Controller extends MouseAdapter{
 	public Controller(IView view) {
 		this.view = view;
 		this.maxUnlockedLevel = gioco.utils.SaveManager.loadProgress();
-        this.view.updateUnlockedLevels(maxUnlockedLevel);
+this.levelStars = gioco.utils.SaveManager.loadStars(); // <-- CARICHIAMO LE STELLE
+        
+        if (this.levelStars == null) {
+            this.levelStars = new java.util.HashMap<>();
+        }
+        this.view.updateUnlockedLevels(maxUnlockedLevel, levelStars);
         
         this.view.addArcherListener(e -> attemptToBuildTower(this.model.getSelectedBuildSlot(), "ARCHER"));
         this.view.addMageListener(e -> attemptToBuildTower(this.model.getSelectedBuildSlot(), "MAGE"));
@@ -72,7 +78,7 @@ public class Controller extends MouseAdapter{
         view.addQuitListener(e -> {
             if (gameTimer != null) gameTimer.stop();
             gioco.utils.SoundManager.playMusic("/assets/audio/audioMenu.wav");
-            view.updateUnlockedLevels(maxUnlockedLevel);
+            view.updateUnlockedLevels(maxUnlockedLevel, levelStars);
             view.switchToMenu(); 
         });
 	}
@@ -96,21 +102,46 @@ public class Controller extends MouseAdapter{
                 
                 if (model.getCurrentWaveNumber() > model.getTotalWaves() && model.getActiveEnemies().isEmpty()) {
                     int currentLvl = model.getCurrentLevelNumber();
+                    int starsEarned = calculateStars(model.getPlayerHealth(), model.getMaxPlayerHealth());
+                    
+                    boolean progressUpdated = false;
+                    
+                    // Sblocco livello successivo
                     if (currentLvl >= maxUnlockedLevel) {
                         maxUnlockedLevel = currentLvl + 1;
-                        
-                        gioco.utils.SaveManager.saveProgress(maxUnlockedLevel);
+                        progressUpdated = true;
                     }
+                    
+                    // Aggiornamento stelle (salva solo se hai fatto un record migliore)
+                    int currentStars = levelStars.getOrDefault(currentLvl, 0);
+                    if (starsEarned > currentStars) {
+                        levelStars.put(currentLvl, starsEarned);
+                        progressUpdated = true;
+                    }
+                    
+                    // Salva su file solo se c'è un effettivo miglioramento
+                    if (progressUpdated) {
+                        gioco.utils.SaveManager.saveProgress(maxUnlockedLevel, levelStars);
+                    }
+                    
                     view.render(this.model); 
                     ((Timer)e.getSource()).stop(); 
                 }
-                
             } else {
                 view.render(this.model);
                 ((Timer)e.getSource()).stop();
             }
         });
         gameTimer.start();
+    }
+	
+	private int calculateStars(int currentHealth, int maxHealth) {
+        double percentage = (double) currentHealth / maxHealth;
+        
+        if (percentage >= 0.90) return 3;      // Vittoria schiacciante
+        else if (percentage >= 0.50) return 2; // Buona vittoria
+        else if (percentage > 0) return 1;     // Sopravvissuto
+        return 0;
     }
 	
 	public void attachToPanel(JPanel panel) {

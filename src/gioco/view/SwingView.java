@@ -113,21 +113,27 @@ public class SwingView implements IView {
     }
     
     @Override
-    public void updateUnlockedLevels(int maxUnlockedLevel) {
+    public void updateUnlockedLevels(int maxUnlockedLevel, java.util.Map<Integer, Integer> levelStars) {
+        // Creiamo una variabile per lo stile delle stelle. 
+        // - "font-size: 26px" le rende più grandi.
+        // - "vertical-align: 2px" le spinge leggermente verso l'alto (puoi mettere numeri negativi come -2px per abbassarle!)
+        String starStyle = "font-family: Arial; font-size: 26px; vertical-align: 2px; color: #FFD700;"; // Aggiunto anche il color oro #FFD700!
+
         if (btnLevel1 != null) {
             btnLevel1.setEnabled(maxUnlockedLevel >= 1);
+            btnLevel1.setText("<html>LIVELLO 1 &nbsp;<span style='" + starStyle + "'>" + getStarString(levelStars.getOrDefault(1, 0)) + "</span></html>");
         }
         
         if (btnLevel2 != null) {
             btnLevel2.setEnabled(maxUnlockedLevel >= 2);
-            btnLevel2.setText(maxUnlockedLevel >= 2 ? "LIVELLO 2" : "LIVELLO 2");
+            btnLevel2.setText(maxUnlockedLevel >= 2 ? "<html>LIVELLO 2 &nbsp;<span style='" + starStyle + "'>" + getStarString(levelStars.getOrDefault(2, 0)) + "</span></html>" : "LIVELLO 2");
             btnLevel2.setForeground(maxUnlockedLevel >= 2 ? Color.WHITE : Color.GRAY);
             btnLevel2.setCursor(new Cursor(maxUnlockedLevel >= 2 ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
         }
         
         if (btnLevel3 != null) {
             btnLevel3.setEnabled(maxUnlockedLevel >= 3);
-            btnLevel3.setText(maxUnlockedLevel >= 3 ? "LIVELLO 3" : "LIVELLO 3");
+            btnLevel3.setText(maxUnlockedLevel >= 3 ? "<html>LIVELLO 3 &nbsp;<span style='" + starStyle + "'>" + getStarString(levelStars.getOrDefault(3, 0)) + "</span></html>" : "LIVELLO 3");
             btnLevel3.setForeground(maxUnlockedLevel >= 3 ? Color.WHITE : Color.GRAY);
             btnLevel3.setCursor(new Cursor(maxUnlockedLevel >= 3 ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
         }
@@ -135,6 +141,14 @@ public class SwingView implements IView {
         if (menuPanel != null) {
             menuPanel.repaint();
         }
+    }
+
+    // Rimosse le parentesi quadre per un look più pulito e "arcade"
+    private String getStarString(int stars) {
+        if (stars == 3) return "★★★";
+        if (stars == 2) return "★★☆";
+        if (stars == 1) return "★☆☆";
+        return "☆☆☆";
     }
     
     @Override
