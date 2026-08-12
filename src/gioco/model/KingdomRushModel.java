@@ -142,7 +142,7 @@ public class KingdomRushModel implements IModel{
 	}
 	
 	@Override
-	public void upgradeSelectedTower() {
+public void upgradeSelectedTower() {
 		
 		TowerSlot slot = getSelectedBuildSlot();
 		
@@ -152,6 +152,17 @@ public class KingdomRushModel implements IModel{
 			if(tower.canUpgrade() && this.gold >= tower.getUpgradeCost()) {
 				this.gold -= tower.getUpgradeCost();
 				tower.upgradeTower();
+				
+				// --- NUOVO: SE E' UNA CASERMA, POTENZIA I SOLDATI GIA' VIVI ---
+				if (tower.getType() == Tower.BARRACKS_TYPE) {
+					for (Soldier s : activeSoldiers) {
+						if (s.getParentTower() == tower) {
+							s.applyUpgrade();
+						}
+					}
+				}
+				// --------------------------------------------------------------
+				
 				deselectBuildSlot();
 			}
 		}

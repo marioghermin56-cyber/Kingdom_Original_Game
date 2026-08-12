@@ -36,6 +36,21 @@ public class Soldier {
 		this.destY = y;
 		this.formationIndex = formationIndex;
 		this.parentTower = parentTower;
+		
+		// 1. Leggiamo il livello attuale della torre
+		int towerLvl = parentTower.getLvl();
+		
+		// 2. Impostiamo le statistiche in base al livello
+		if (towerLvl == 1) {
+			this.maxHealth = 60;
+			this.damage = 5;
+		} else if (towerLvl == 2) {
+			this.maxHealth = 100;
+			this.damage = 10;
+		} else if (towerLvl == 3) {
+			this.maxHealth = 150;
+			this.damage = 18;
+		}
 	}
 	
 	
@@ -149,6 +164,22 @@ public class Soldier {
     		this.target = null;
     	}
     }
+    
+    public void applyUpgrade() {
+		int newLvl = parentTower.getLvl();
+		int oldMaxHealth = this.maxHealth;
+		
+		if (newLvl == 2) {
+			this.maxHealth = 100;
+			this.damage = 6;
+		} else if (newLvl == 3) {
+			this.maxHealth = 150;
+			this.damage = 10;
+		}
+		
+		// Aumentiamo la vita attuale del soldato dello stesso quantitativo di vita massima guadagnata
+		this.health += (this.maxHealth - oldMaxHealth); 
+	}
     
     public void updateTikCounter() {
     	tikCounter++;
