@@ -58,21 +58,22 @@ public class Tower {
 		lvl++;
 		
 		if (this.type == ARCHER_TYPE) {
-            this.damage += 15;      
-            this.cooldown -= 1; 
-            this.range += 25;
+            this.damage += 12;      
+            this.cooldown -= 3;     
+            this.range += 25;       // Raggio upgrade ORIGINALE
         } 
         else if (this.type == MAGE_TYPE) {
-            this.damage += 5;
-            this.cooldown --;
-            this.range += 15;
+            this.damage += 55;      
+            this.cooldown -= 5;
+            this.range += 15;       // Raggio upgrade ORIGINALE
         } 
         else if (this.type == CANNON_TYPE) {
-            this.damage += 15;     
-            this.range += 10;        
+            this.damage += 28;      
+            this.cooldown -= 10;    
+            this.range += 10;       // Raggio upgrade ORIGINALE 
         }
         else if (this.type == BARRACKS_TYPE) {
-            this.cooldown = Math.max(30, this.cooldown - 10); 
+            this.cooldown = Math.max(120, this.cooldown - 120); 
         }
 	}
 	
@@ -81,18 +82,6 @@ public class Tower {
 	}
 	
 	public int getCooldown() {
-		if (this.type == ARCHER_TYPE) {
-            this.cooldown = 45;
-        } 
-        else if (this.type == MAGE_TYPE) {
-            this.cooldown= 60;
-        } 
-        else if (this.type == CANNON_TYPE) {
-            this.cooldown = 90;           
-        }
-        else if (this.type == BARRACKS_TYPE) {
-            this.cooldown = 50;
-        }
 		return this.cooldown;
 	}
 	

@@ -178,19 +178,23 @@ public class KingdomRushModel implements IModel{
 		if(gold >= cost) {
 			gold -= cost;
 			
+			// Parametri Tower: (danno, raggio, cooldown, tipo)
 			if(towerType.equals("ARCHER")) {
-				slots.setTower(new Tower(3,220,2, Tower.ARCHER_TYPE));
+				// Danno 12, Raggio ORIGINALE 220, Cooldown 30
+				slots.setTower(new Tower(12, 220, 30, Tower.ARCHER_TYPE));
 			}else if(towerType.equals("MAGE")) {
-				slots.setTower(new Tower(8,130,3,Tower.MAGE_TYPE));
+				// Danno 55, Raggio ORIGINALE 130, Cooldown 90
+				slots.setTower(new Tower(55, 130, 90, Tower.MAGE_TYPE));
 			}else if(towerType.equals("CANNON")) {
-				slots.setTower(new Tower(15,150,5,Tower.CANNON_TYPE));
+				// Danno 28, Raggio ORIGINALE 150, Cooldown 120
+				slots.setTower(new Tower(28, 150, 120, Tower.CANNON_TYPE));
 			}else if(towerType.equals("BARRACKS")) {
-				slots.setTower(new Tower(0,150,90,Tower.BARRACKS_TYPE));
+				// Danno 0, Raggio ORIGINALE 150, Respawn 600
+				slots.setTower(new Tower(0, 150, 600, Tower.BARRACKS_TYPE));
 			}
 			return true;
 		}
-		return false;
-		
+		return false;	
 	}
 	
 	@Override
@@ -430,13 +434,28 @@ public class KingdomRushModel implements IModel{
 							int type = queue.poll();
 							EnemyPath assignedPath = enemyPath.get(pathIndex);
 
-							if(type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40,0.5,assignedPath,5,type,tikCounter,3, 11));
-							else if(type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(20,0.8,assignedPath,3,type,tikCounter,3 , 8));
-							else if(type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(90,0.3,assignedPath,12,type,tikCounter,3 , 15));
+							if (type == Enemy.GOBLIN_TYPE) {
+							    // Goblin: Carne da cannone. Veloci, fragili, danno 1 vita.
+							    enemiesToAdd.add(new Enemy(40, 0.8, assignedPath, 5, type, tikCounter, 1, 11));
+							} 
+							else if (type == Enemy.SCORPION_TYPE) {
+							    // Scorpione: Incursore. Molto veloci, saltano le difese, danno 1 vita.
+							    enemiesToAdd.add(new Enemy(80, 1.4, assignedPath, 10, type, tikCounter, 1, 8));
+							} 
+							else if (type == Enemy.ORC_TYPE) {
+							    // Orco: Tank. Lentissimi, resistenti, tolgono ben 3 vite se passano!
+							    enemiesToAdd.add(new Enemy(350, 0.4, assignedPath, 20, type, tikCounter, 3, 15));
+							} 
+							else if (type == 4) {
+							    // BOSS FINALE: Inarrestabile. 6000 HP, toglie 20 vite in un colpo solo (game over).
+							    enemiesToAdd.add(new Enemy(6000, 0.15, assignedPath, 500, type, tikCounter, 20, 10));
+							} 
 							
+							// CORREZIONE IMPORTANTE: Azzeriamo il timer dopo aver fatto uscire un nemico!
 							currentWave.getPathTimer().put(pathIndex, 0);
-						} else {
-							currentWave.getPathTimer().put(pathIndex, timer);
+						}else {
+						    // FONDAMENTALE: Se non è tempo di uscire, salviamo il timer aggiornato per il prossimo tick!
+						    currentWave.getPathTimer().put(pathIndex, timer);
 						}
 					}
 				}

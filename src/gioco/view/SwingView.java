@@ -450,6 +450,7 @@ public class SwingView implements IView {
 
     private JButton createTransparentButton() {
         JButton button = new JButton();
+        button.setOpaque(false);
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
@@ -581,6 +582,7 @@ public class SwingView implements IView {
                 orcFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_walk_%03d.png", i + 1));
             }
             enemyAssets.put(Enemy.ORC_TYPE, orcFrames);
+            enemyAssets.put(4, orcFrames);
             
             BufferedImage[] scorpionFrames = new BufferedImage[10];
             for (int i = 0; i < 10; i++) {
@@ -921,19 +923,33 @@ public class SwingView implements IView {
                 int ex = (int) e.getX();
                 int ey = (int) e.getY();
                 
-                int shadowX = e.isFacingRight() ? (ex - 11) : (ex - 3);
+                // 1. Controlliamo se è il Boss
+                boolean isBoss = (e.getType() == 4);
+                
+                // 2. Impostiamo dimensioni dinamiche (72x72 per il Boss, 36x36 per i normali)
+                int drawW = isBoss ? 72 : 36;
+                int drawH = isBoss ? 72 : 36;
+                
+                // 3. Ricalcoliamo il centro per far camminare il Boss esattamente sul sentiero
+                int drawX = ex - (drawW / 2);
+                int drawY = ey - (drawH / 2);
+                
+                // 4. Adattiamo l'ombra (più grande e spostata più in basso per il Boss)
+                int shadowW = isBoss ? 28 : 14;
+                int shadowH = isBoss ? 16 : 10;
+                int shadowX = e.isFacingRight() ? (ex - (shadowW / 2) - 4) : (ex - (shadowW / 4));
+                int shadowY = ey + (isBoss ? 20 : 9);
+                
                 g.setColor(new Color(0, 0, 0, 80)); 
-                g.fillOval(shadowX, ey + 9, 14, 10);
+                g.fillOval(shadowX, shadowY, shadowW, shadowH);
                 
                 BufferedImage[] frames = enemyAssets.get(e.getType());
                 if (frames != null && frames.length > 0) {
-                    int frameIndex = (e.getTikCounter() / 2) % frames.length; 
+                    // Rallentiamo leggermente l'animazione del Boss dividendola per 4 invece che per 2, 
+                    // così i suoi passi sembreranno più pesanti!
+                    int animationSpeed = isBoss ? 4 : 2; 
+                    int frameIndex = (e.getTikCounter() / animationSpeed) % frames.length; 
                     BufferedImage imgToDraw = frames[frameIndex];
-                    
-                    int drawX = ex - 18;
-                    int drawY = ey - 18;
-                    int drawW = 36;
-                    int drawH = 36;
                     
                     if (e.isFacingRight()) {
                         g.drawImage(imgToDraw, drawX, drawY, drawW, drawH, null);
@@ -945,10 +961,12 @@ public class SwingView implements IView {
                     }
                 } else {
                     g.setColor(Color.RED); 
-                    g.fillOval(ex - 12, ey - 12, 24, 24);
+                    g.fillOval(drawX, drawY, drawW, drawH);
                 }
                 
-                drawHealthBar(g, shadowX, ey - 25, e.getHealth(), e.getMaxHealth());
+                // 5. Alziamo la barra della vita del Boss in modo che galleggi sopra la sua testa
+                int healthBarY = ey - (isBoss ? 45 : 25);
+                drawHealthBar(g, shadowX, healthBarY, e.getHealth(), e.getMaxHealth());
             }
         }
         

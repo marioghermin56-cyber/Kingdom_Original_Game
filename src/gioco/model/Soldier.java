@@ -23,10 +23,13 @@ public class Soldier {
 	public Soldier(double x, double y, int formationIndex, Tower parentTower) {
 		this.x = x;
 		this.y = y;
-		this.maxHealth = 50;
+		
+		// --- BILANCIAMENTO TRUPPE ---
+		this.maxHealth = 60; // <-- AUMENTATO A 60. Resistono più a lungo ai colpi pesanti.
 		this.health = this.maxHealth;
-		this.attackCooldown = 30;
-		this.damage = 3;
+		this.attackCooldown = 30; // Colpiscono velocemente per "distrarre" il nemico
+		this.damage = 3; // <-- MANTENUTO A 3. Il loro scopo è bloccare, non uccidere.
+		
 		this.currentCooldown = 0;
 		this.target = null;	
 		this.destX = x;
