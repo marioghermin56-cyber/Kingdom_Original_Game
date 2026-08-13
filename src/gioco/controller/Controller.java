@@ -69,6 +69,10 @@ this.levelStars = gioco.utils.SaveManager.loadStars(); // <-- CARICHIAMO LE STEL
         	model.togglePause();
         	view.render(model);
         });
+        this.view.addResumeListener(e -> {
+            model.togglePause(); // Toglie la pausa dal gioco
+            view.render(model);  // Ridisegna lo schermo per far sparire il menu di pausa
+        });
         
         view.addRestartListener(e -> {
         	int levelNumber = model.getCurrentLevelNumber();

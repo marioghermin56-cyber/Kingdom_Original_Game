@@ -12,6 +12,7 @@ public interface IView {
 	
 	// --- Metodi Pausa ---
 	void addPauseListener(ActionListener listener);
+	void addResumeListener(ActionListener listener);
 	void addRestartListener(ActionListener listener);
 	void addQuitListener(ActionListener listener);
 	void switchToMenu();

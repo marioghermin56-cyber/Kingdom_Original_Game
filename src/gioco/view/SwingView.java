@@ -17,7 +17,7 @@ public class SwingView implements IView {
     private GamePanel gamePanel;
     
     private JButton archerButton, mageButton, cannonButton, barracksButton, rallyButton, upgradeButton, musicButton, soundButton;
-    private JButton pauseBtn, restartBtn, quitBtn;
+    private JButton pauseBtn, resumeBtn, restartBtn, quitBtn;
     private Font font, mainFont, winLoseFont;
     
     private JButton btnStart;
@@ -62,18 +62,45 @@ public class SwingView implements IView {
         pausePanel.setBackground(new Color(0, 0, 0, 150));
         pausePanel.setVisible(false);
         
+     // --- 1. CREAZIONE DEL NUOVO TASTO (Riprendi / Freccia) ---
+        resumeBtn = createTransparentButton();
+        // NOTA: Sostituisci "resume_button.png" con il nome esatto della tua immagine della freccia
+        resumeBtn.setIcon(scaleIcon(loadImage("/assets/background/button_left.png"), 60, 60)); 
+        resumeBtn.setFocusPainted(false);
+        resumeBtn.setVisible(true);
+        resumeBtn.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT); // Centra il pulsante rispetto agli altri due
+
+        // --- 2. IL TUO PANNELLO ORIGINALE (Restart e Quit) ---
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 30, 10));
         buttonPanel.setOpaque(false); 
+        
         restartBtn = createTransparentButton();
         restartBtn.setIcon(scaleIcon(loadImage("/assets/background/restart_button.png"), 117, 70)); 
+        restartBtn.setFocusPainted(false); // <--- AGGIUNTA FONDAMENTALE
         restartBtn.setVisible(true);
+        
         quitBtn = createTransparentButton();
         quitBtn.setIcon(scaleIcon(loadImage("/assets/background/quit_button.png"), 117, 70)); 
+        quitBtn.setFocusPainted(false); // <--- AGGIUNTA FONDAMENTALE
         quitBtn.setVisible(true);
-        buttonPanel.setPreferredSize(new Dimension(250, 120));
+        
         buttonPanel.add(restartBtn);
         buttonPanel.add(quitBtn);
-        pausePanel.add(buttonPanel);     
+
+        // --- 3. UNIAMO TUTTO (La Freccia sopra, Restart e Quit sotto) ---
+        JPanel wrapperPanel = new JPanel();
+        wrapperPanel.setLayout(new BoxLayout(wrapperPanel, BoxLayout.Y_AXIS));
+        wrapperPanel.setOpaque(false);
+        
+        wrapperPanel.add(resumeBtn); // Aggiungiamo la freccia in cima
+        wrapperPanel.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 20))); // Creiamo uno spazio vuoto di 20 pixel per distanziarli
+        wrapperPanel.add(buttonPanel); // Aggiungiamo la griglia con i due tasti sotto
+        
+        // Infine aggiungi il wrapperPanel al tuo pannello di pausa al posto di buttonPanel
+        buttonPanel.setPreferredSize(new Dimension(250, 120)); // Impostiamo la dimensione qui
+        pausePanel.add(wrapperPanel);
+        
+        // ELIMINATE LE 3 RIGHE DOPPIE QUI SOTTO!    
 
         upgradeButton = createUpgradeButton();
 
@@ -110,6 +137,8 @@ public class SwingView implements IView {
             }
         }
         cardLayout.show(mainContainer, "MENU");
+        mainContainer.revalidate();
+        mainContainer.repaint();
     }
     
     @Override
@@ -154,6 +183,10 @@ public class SwingView implements IView {
     @Override
     public void addPauseListener(ActionListener listener) {
     	pauseBtn.addActionListener(listener);
+    }
+    @Override
+    public void addResumeListener(ActionListener listener) {
+    	resumeBtn.addActionListener(listener);
     }
     @Override
     public void addRestartListener(ActionListener listener) {
@@ -372,6 +405,7 @@ public class SwingView implements IView {
         }
         
         btnExtra.setVisible(true);
+        btnExtra.addActionListener(e -> showInfoDialog());
 
         gbcLevels.gridy = 1;
         gbcLevels.insets = new Insets(0, 0, 0, 0);
@@ -520,6 +554,90 @@ public class SwingView implements IView {
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
         return button;
+    }
+    
+    private void showInfoDialog() {
+        // 1. Creiamo un JDialog modale senza collegarlo a un parent specifico
+        JDialog infoDialog = new JDialog((java.awt.Frame) null, "Info", JDialog.ModalityType.APPLICATION_MODAL);
+        infoDialog.setUndecorated(true); 
+        infoDialog.setSize(500, 380);
+        infoDialog.setLocationRelativeTo(null); // Centra il popup al centro dello schermo
+        
+        // ... (il resto del codice del pannello e dei testi rimane identico) ...
+        
+        // 2. Pannello principale scuro
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(new Color(35, 35, 35)); 
+        contentPanel.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 2)); 
+        
+        // --- 3. PANNELLO SUPERIORE (TASTO INDIETRO) ---
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        topPanel.setOpaque(false); 
+        
+        JButton btnBack = new JButton("<");
+        btnBack.setFont(new Font("Arial", Font.BOLD, 18));
+        btnBack.setForeground(Color.WHITE);
+        btnBack.setBackground(new Color(70, 70, 70)); 
+        btnBack.setFocusPainted(false);
+        btnBack.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnBack.setMargin(new Insets(5, 10, 5, 10));
+        btnBack.addActionListener(e -> infoDialog.dispose()); 
+        
+        topPanel.add(btnBack);
+        contentPanel.add(topPanel, BorderLayout.NORTH);
+        
+        // --- 4. PANNELLO CENTRALE (TESTO SENZA HTML) ---
+        // Usiamo BoxLayout per impilare le etichette una sotto l'altra
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+        textPanel.setOpaque(false);
+        textPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20)); // Margini interni
+        
+        // TITOLO (Applica qui il font del tuo titolo!)
+        JLabel lblTitle = new JLabel("I nemici non devono passare!");
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 24)); // <--- Sostituisci questo con il tuo font!
+        lblTitle.setForeground(new Color(255, 215, 0)); // Giallo Oro
+        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrato
+        
+        // SOTTOTITOLO
+        JLabel lblDesc = new JLabel("SUGGERIMENTI");
+        lblDesc.setFont(new Font("Arial", Font.PLAIN, 14)); // <--- Puoi usare il tuo font anche qui
+        lblDesc.setForeground(Color.WHITE);
+        lblDesc.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        // ELENCO DELLE TORRI (Usiamo un GridLayout per distanziarle bene)
+        JPanel towersPanel = new JPanel(new GridLayout(4, 1, 0, 10)); 
+        towersPanel.setOpaque(false);
+        towersPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        
+        towersPanel.add(createCustomLabel("🏹ARCIERE: fuoco rapido ed economico, ottimo contro i Goblin."));
+        towersPanel.add(createCustomLabel("⚔️CASERMA: schiera soldati per bloccare l'avanzata."));
+        towersPanel.add(createCustomLabel("🔮MAGO: attacchi letali, indispensabile contro gli Orchi."));
+        towersPanel.add(createCustomLabel("💣CANNONE: danni ad area contro gli sciami nemici."));
+      
+        
+        // Assemblaggio finale del testo
+        textPanel.add(lblTitle);
+        textPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Crea uno spazio vuoto tra titolo e descrizione
+        textPanel.add(lblDesc);
+        textPanel.add(towersPanel);
+        
+        contentPanel.add(textPanel, BorderLayout.CENTER);
+        
+        // 5. Mostriamo a schermo
+        infoDialog.setContentPane(contentPanel);
+        infoDialog.setVisible(true);
+    }
+    
+    // Metodo di supporto per generare le scritte delle torri senza ripetere il codice
+    private JLabel createCustomLabel(String text) {
+        // Avvolgiamo il testo in HTML e specifichiamo i font nativi per le emoji come priorità
+        String htmlText = "<html><span style='font-family: \"Segoe UI Emoji\", \"Apple Color Emoji\", Arial; font-size: 14px; color: white;'>" + text + "</span></html>";
+        
+        JLabel label = new JLabel(htmlText);
+        // Non serve più impostare .setFont() o .setForeground() qui, 
+        // perché se ne occupa direttamente lo stile CSS dell'HTML!
+        return label;
     }
 
     private class GamePanel extends JPanel {

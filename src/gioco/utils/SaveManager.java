@@ -6,12 +6,48 @@ import java.util.Map;
 
 public class SaveManager {
     
-    // Il nome del file in cui salveremo i dati
-    private static final String SAVE_FILE = "savegame.dat";
+    // Il nome del file in cui salveremo i dati (senza il percorso)
+    private static final String FILE_NAME = "savegame.dat";
+    
+    // Il nome della cartella del tuo gioco (puoi modificarlo a piacimento)
+    private static final String FOLDER_NAME = "KingdomRushClone";
+
+    // 1. Metodo privato per ottenere e creare la cartella di sistema corretta
+    private static String getSaveDirectory() {
+        String os = System.getProperty("os.name").toLowerCase();
+        String userHome = System.getProperty("user.home");
+        String saveDir = "";
+
+        if (os.contains("win")) {
+            // Windows: C:\Users\NomeUtente\AppData\Roaming\KingdomRushClone\
+            saveDir = System.getenv("APPDATA") + File.separator + FOLDER_NAME + File.separator;
+        } else if (os.contains("mac")) {
+            // Mac: /Users/NomeUtente/Library/Application Support/KingdomRushClone/
+            saveDir = userHome + "/Library/Application Support/" + FOLDER_NAME + "/";
+        } else {
+            // Linux: /home/NomeUtente/.local/share/KingdomRushClone/
+            saveDir = userHome + "/.local/share/" + FOLDER_NAME + "/";
+        }
+
+        // Se la cartella non esiste nel computer, la creiamo in automatico
+        File directory = new File(saveDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        return saveDir;
+    }
+
+    // 2. Metodo per ottenere il percorso assoluto e completo del file di salvataggio
+    private static String getSaveFilePath() {
+        return getSaveDirectory() + FILE_NAME;
+    }
 
     // Metodo per salvare il progresso e le stelle
     public static void saveProgress(int maxUnlockedLevel, Map<Integer, Integer> levelStars) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SAVE_FILE))) {
+        String fullPath = getSaveFilePath();
+        
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fullPath))) {
             // Salviamo il livello massimo nella prima riga
             writer.write(String.valueOf(maxUnlockedLevel));
             writer.newLine();
@@ -30,7 +66,8 @@ public class SaveManager {
 
     // Metodo per caricare il progresso (livello massimo sbloccato)
     public static int loadProgress() {
-        File file = new File(SAVE_FILE);
+        File file = new File(getSaveFilePath());
+        
         if (file.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line = reader.readLine();
@@ -44,10 +81,10 @@ public class SaveManager {
         return 1; 
     }
     
-    // Nuovo metodo per caricare la mappa delle stelle
+    // Metodo per caricare la mappa delle stelle
     public static Map<Integer, Integer> loadStars() {
         Map<Integer, Integer> stars = new HashMap<>();
-        File file = new File(SAVE_FILE);
+        File file = new File(getSaveFilePath());
         
         if (file.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
