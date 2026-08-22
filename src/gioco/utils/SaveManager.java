@@ -3,36 +3,27 @@ package gioco.utils;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.URISyntaxException;
 
 public class SaveManager {
     
-    // Il nome del file in cui salveremo i dati (senza il percorso)
+    // Il nome del file in cui salveremo i dati
     private static final String FILE_NAME = "savegame.dat";
-    
-    // Il nome della cartella del tuo gioco (puoi modificarlo a piacimento)
-    private static final String FOLDER_NAME = "KingdomRushClone";
 
-    // 1. Metodo privato per ottenere e creare la cartella di sistema corretta
+    // 1. Metodo privato per ottenere la cartella del file .jar o .class
     private static String getSaveDirectory() {
-        String os = System.getProperty("os.name").toLowerCase();
-        String userHome = System.getProperty("user.home");
         String saveDir = "";
-
-        if (os.contains("win")) {
-            // Windows: C:\Users\NomeUtente\AppData\Roaming\KingdomRushClone\
-            saveDir = System.getenv("APPDATA") + File.separator + FOLDER_NAME + File.separator;
-        } else if (os.contains("mac")) {
-            // Mac: /Users/NomeUtente/Library/Application Support/KingdomRushClone/
-            saveDir = userHome + "/Library/Application Support/" + FOLDER_NAME + "/";
-        } else {
-            // Linux: /home/NomeUtente/.local/share/KingdomRushClone/
-            saveDir = userHome + "/.local/share/" + FOLDER_NAME + "/";
-        }
-
-        // Se la cartella non esiste nel computer, la creiamo in automatico
-        File directory = new File(saveDir);
-        if (!directory.exists()) {
-            directory.mkdirs();
+        try {
+            // Ottiene il percorso esatto del file .jar o della cartella dei bytecode
+            File appLocation = new File(SaveManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            
+            // Prende il percorso assoluto della cartella "genitore" (quella che contiene il .jar)
+            saveDir = appLocation.getParentFile().getAbsolutePath() + File.separator;
+            
+        } catch (URISyntaxException | SecurityException e) {
+            // Fallback: se qualcosa va storto, usiamo la working directory corrente
+            System.err.println("Impossibile determinare la cartella del JAR, uso la cartella corrente.");
+            saveDir = System.getProperty("user.dir") + File.separator;
         }
 
         return saveDir;

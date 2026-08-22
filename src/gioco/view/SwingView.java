@@ -40,9 +40,10 @@ public class SwingView implements IView {
     public SwingView() {
         frame = new JFrame("Pseudo Kingdom Rush - MVC Alpha");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(true); 
+        frame.setResizable(false); 
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 
+        
         archerButton = createTransparentButton();
         mageButton = createTransparentButton();
         barracksButton = createTransparentButton();
@@ -143,9 +144,7 @@ public class SwingView implements IView {
     
     @Override
     public void updateUnlockedLevels(int maxUnlockedLevel, java.util.Map<Integer, Integer> levelStars) {
-        // Creiamo una variabile per lo stile delle stelle. 
-        // - "font-size: 26px" le rende più grandi.
-        // - "vertical-align: 2px" le spinge leggermente verso l'alto (puoi mettere numeri negativi come -2px per abbassarle!)
+        
         String starStyle = "font-family: Arial; font-size: 26px; vertical-align: 2px; color: #FFD700;"; // Aggiunto anche il color oro #FFD700!
 
         if (btnLevel1 != null) {
@@ -387,7 +386,7 @@ public class SwingView implements IView {
         GridBagConstraints gbcLevels = new GridBagConstraints();
         gbcLevels.gridx = 0;
         gbcLevels.gridy = 0;
-        gbcLevels.insets = new Insets(0, 0, 80, 0); // 30px di spazio tra i livelli e il bottone sotto
+        gbcLevels.insets = new Insets(0, 0, 80, 0); // 80px di spazio tra i livelli e il bottone sotto
         levelsPanel.add(buttonsGrid, gbcLevels);
 
      // --- CREAZIONE E AGGIUNTA DEL NUOVO BOTTONE (60x60) ---
@@ -441,7 +440,6 @@ public class SwingView implements IView {
         centerPanel.add(btnStart, gbcInner);
 
         // 2. Aggiungiamo i livelli con un margine superiore per spingerli in basso
-        // Se scendono troppo poco, aumenta il 120 (es. 150 o 180). Se scendono troppo, abbassalo!
         gbcInner.insets = new Insets(220, 0, 0, 0); 
         centerPanel.add(levelsPanel, gbcInner);
 
