@@ -24,9 +24,8 @@ public class Soldier {
 		this.x = x;
 		this.y = y;
 		
-		// --- BILANCIAMENTO TRUPPE ---
-		this.maxHealth = 60; // <-- AUMENTATO A 60. Resistono più a lungo ai colpi pesanti.
-		this.health = this.maxHealth;
+		 
+		
 		this.attackCooldown = 30; // Colpiscono velocemente per "distrarre" il nemico
 		this.damage = 3; // <-- MANTENUTO A 3. Il loro scopo è bloccare, non uccidere.
 		
@@ -42,15 +41,16 @@ public class Soldier {
 		
 		// 2. Impostiamo le statistiche in base al livello
 		if (towerLvl == 1) {
-			this.maxHealth = 60;
+			this.maxHealth = 80;
 			this.damage = 5;
 		} else if (towerLvl == 2) {
-			this.maxHealth = 100;
+			this.maxHealth = 115;
 			this.damage = 10;
 		} else if (towerLvl == 3) {
-			this.maxHealth = 150;
+			this.maxHealth = 165;
 			this.damage = 18;
 		}
+		this.health = this.maxHealth;
 	}
 	
 	
@@ -170,11 +170,11 @@ public class Soldier {
 		int oldMaxHealth = this.maxHealth;
 		
 		if (newLvl == 2) {
-			this.maxHealth = 100;
-			this.damage = 6;
-		} else if (newLvl == 3) {
-			this.maxHealth = 150;
+			this.maxHealth = 115;
 			this.damage = 10;
+		} else if (newLvl == 3) {
+			this.maxHealth = 165;
+			this.damage = 18;
 		}
 		
 		// Aumentiamo la vita attuale del soldato dello stesso quantitativo di vita massima guadagnata

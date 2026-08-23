@@ -251,10 +251,10 @@ public void upgradeSelectedTower() {
 			enemy.move();
 
 			if (enemy.hasReachedEnd()) {
-				subtractPlayerHealth(1);
+				subtractPlayerHealth(enemy.getValue());
 				enemiesToRemove.add(enemy); // Invece di cancellarlo subito, lo mettiamo in lista
 			} else if (enemy.isDead()) {
-				addGold(enemy.getValue());
+				addGold(enemy.getGoldReward());
 				enemiesToRemove.add(enemy);
 			}
 		}
@@ -447,19 +447,19 @@ public void upgradeSelectedTower() {
 
 							if (type == Enemy.GOBLIN_TYPE) {
 							    // Goblin: Carne da cannone. Veloci, fragili, danno 1 vita.
-							    enemiesToAdd.add(new Enemy(40, 0.8, assignedPath, 5, type, tikCounter, 1, 11));
+							    enemiesToAdd.add(new Enemy(40, 0.8, assignedPath, 1, type, tikCounter, 2, 11, 5));
 							} 
 							else if (type == Enemy.SCORPION_TYPE) {
 							    // Scorpione: Incursore. Molto veloci, saltano le difese, danno 1 vita.
-							    enemiesToAdd.add(new Enemy(80, 1.4, assignedPath, 10, type, tikCounter, 1, 8));
+							    enemiesToAdd.add(new Enemy(80, 1.4, assignedPath, 1, type, tikCounter, 4, 8, 8));
 							} 
 							else if (type == Enemy.ORC_TYPE) {
 							    // Orco: Tank. Lentissimi, resistenti, tolgono ben 3 vite se passano!
-							    enemiesToAdd.add(new Enemy(350, 0.4, assignedPath, 20, type, tikCounter, 3, 15));
+							    enemiesToAdd.add(new Enemy(350, 0.4, assignedPath, 3, type, tikCounter, 10, 15, 10));
 							} 
 							else if (type == 4) {
 							    // BOSS FINALE: Inarrestabile. 6000 HP, toglie 20 vite in un colpo solo (game over).
-							    enemiesToAdd.add(new Enemy(6000, 0.15, assignedPath, 500, type, tikCounter, 20, 10));
+							    enemiesToAdd.add(new Enemy(6000, 0.15, assignedPath, 20, type, tikCounter, 200, 10, 400));
 							} 
 							
 							// CORREZIONE IMPORTANTE: Azzeriamo il timer dopo aver fatto uscire un nemico!

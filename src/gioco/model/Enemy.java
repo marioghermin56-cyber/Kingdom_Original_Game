@@ -31,8 +31,9 @@ public class Enemy {
 	private int attackCooldown;
 	private int currentCooldown;
 	private boolean isFacingRight = true;
+	private int goldReward;
 	
-	public Enemy(int health, double speed, EnemyPath path, int value, int type, int tikCounter, int attackDamage, int attackCooldown) {
+	public Enemy(int health, double speed, EnemyPath path, int value, int type, int tikCounter, int attackDamage, int attackCooldown, int goldReward) {
 		this.health = health;
 		this.maxHealth = health;
 		this.speed = speed;
@@ -45,6 +46,7 @@ public class Enemy {
 		this.attackDamage = attackDamage;
 		this.attackCooldown = attackCooldown;
 		this.currentCooldown = attackCooldown;
+		this.goldReward = goldReward;
 		
 		
 		if(path != null && !path.getWaypoints().isEmpty()) {
@@ -121,6 +123,10 @@ public class Enemy {
 	
 	public void setBlocked(boolean blocked) {
 		this.isBlocked = blocked;
+	}
+	
+	public int getGoldReward() {
+		return this.goldReward;
 	}
 	
 public void move() {
