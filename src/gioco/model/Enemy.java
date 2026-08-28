@@ -6,15 +6,10 @@ public class Enemy {
 
 	
 	public static final int GOBLIN_TYPE = 1;
-	public static final int BLACKWIZARD_TYPE = 2;
-	public static final int DARKGIANT_TYPE = 3;
-	public static final int BLADESWORDSMAN_TYPE = 4;
-	public static final int GHOST_TYPE = 5;
-	public static final int LITTLEDEVIL_TYPE = 6;
 	public static final int ORC_TYPE = 7;
 	public static final int SCORPION_TYPE = 8;
-	public static final int SKINHEAD_TYPE = 9;
-	public static final int DEADSWORDSMAN_TYPE = 10;
+	public static final int YETI_TYPE = 9;
+	
 	
 	private double x, y;
 	private int health;

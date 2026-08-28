@@ -457,7 +457,7 @@ public void upgradeSelectedTower() {
 							    // Orco: Tank. Lentissimi, resistenti, tolgono ben 3 vite se passano!
 							    enemiesToAdd.add(new Enemy(350, 0.4, assignedPath, 3, type, tikCounter, 10, 15, 10));
 							} 
-							else if (type == 4) {
+							else if (type == Enemy.YETI_TYPE) {
 							    // BOSS FINALE: Inarrestabile. 6000 HP, toglie 20 vite in un colpo solo (game over).
 							    enemiesToAdd.add(new Enemy(6000, 0.15, assignedPath, 20, type, tikCounter, 200, 10, 400));
 							} 

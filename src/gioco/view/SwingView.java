@@ -711,7 +711,13 @@ public class SwingView implements IView {
                 goblinFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_walk_%03d.png", i + 1));
             }
             enemyAssets.put(Enemy.GOBLIN_TYPE, goblinFrames);
-
+            
+            
+            BufferedImage[] bossFrames = new BufferedImage[9];
+            for (int i = 0; i < 9; i++) {
+                bossFrames[i] = loadImage(String.format("/assets/BOSS/2_enemies_1_WALK_%03d.png", i + 1));
+            }
+            enemyAssets.put(Enemy.YETI_TYPE, bossFrames);
             try {
                 java.io.InputStream is = getClass().getResourceAsStream("/assets/background/Grandover.ttf");
                 font = Font.createFont(Font.TRUETYPE_FONT, is);
@@ -1040,7 +1046,7 @@ public class SwingView implements IView {
                 int ey = (int) e.getY();
                 
                 // 1. Controlliamo se è il Boss
-                boolean isBoss = (e.getType() == 4);
+                boolean isBoss = (e.getType() == Enemy.YETI_TYPE);
                 
                 // 2. Impostiamo dimensioni dinamiche (72x72 per il Boss, 36x36 per i normali)
                 int drawW = isBoss ? 72 : 36;

@@ -168,7 +168,7 @@ public class LevelManager {
 			
 			// ONDATA 7 (IL BOSS FINALE): L'arrivo del Titano
 			Wave wave7 = new Wave(150); 
-			wave7.addEnemyGroup(4, 1, 0); 
+			wave7.addEnemyGroup(Enemy.YETI_TYPE, 1, 0); 
 			level.addWave(wave7);
 			
 			return level;
