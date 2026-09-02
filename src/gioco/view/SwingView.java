@@ -43,7 +43,6 @@ public class SwingView implements IView {
         frame.setResizable(false); 
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 
-        
         archerButton = createTransparentButton();
         mageButton = createTransparentButton();
         barracksButton = createTransparentButton();
@@ -63,46 +62,39 @@ public class SwingView implements IView {
         pausePanel.setBackground(new Color(0, 0, 0, 150));
         pausePanel.setVisible(false);
         
-     // --- 1. CREAZIONE DEL NUOVO TASTO (Riprendi / Freccia) ---
         resumeBtn = createTransparentButton();
-        // NOTA: Sostituisci "resume_button.png" con il nome esatto della tua immagine della freccia
         resumeBtn.setIcon(scaleIcon(loadImage("/assets/background/button_left.png"), 60, 60)); 
         resumeBtn.setFocusPainted(false);
         resumeBtn.setVisible(true);
-        resumeBtn.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT); // Centra il pulsante rispetto agli altri due
+        resumeBtn.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT); 
 
-        // --- 2. IL TUO PANNELLO ORIGINALE (Restart e Quit) ---
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 30, 10));
         buttonPanel.setOpaque(false); 
         
         restartBtn = createTransparentButton();
         restartBtn.setIcon(scaleIcon(loadImage("/assets/background/restart_button.png"), 117, 70)); 
-        restartBtn.setFocusPainted(false); // <--- AGGIUNTA FONDAMENTALE
+        restartBtn.setFocusPainted(false); 
         restartBtn.setVisible(true);
         
         quitBtn = createTransparentButton();
         quitBtn.setIcon(scaleIcon(loadImage("/assets/background/quit_button.png"), 117, 70)); 
-        quitBtn.setFocusPainted(false); // <--- AGGIUNTA FONDAMENTALE
+        quitBtn.setFocusPainted(false); 
         quitBtn.setVisible(true);
         
         buttonPanel.add(restartBtn);
         buttonPanel.add(quitBtn);
 
-        // --- 3. UNIAMO TUTTO (La Freccia sopra, Restart e Quit sotto) ---
         JPanel wrapperPanel = new JPanel();
         wrapperPanel.setLayout(new BoxLayout(wrapperPanel, BoxLayout.Y_AXIS));
         wrapperPanel.setOpaque(false);
         
-        wrapperPanel.add(resumeBtn); // Aggiungiamo la freccia in cima
-        wrapperPanel.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 20))); // Creiamo uno spazio vuoto di 20 pixel per distanziarli
-        wrapperPanel.add(buttonPanel); // Aggiungiamo la griglia con i due tasti sotto
+        wrapperPanel.add(resumeBtn); 
+        wrapperPanel.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 20))); 
+        wrapperPanel.add(buttonPanel); 
         
-        // Infine aggiungi il wrapperPanel al tuo pannello di pausa al posto di buttonPanel
-        buttonPanel.setPreferredSize(new Dimension(250, 120)); // Impostiamo la dimensione qui
+        buttonPanel.setPreferredSize(new Dimension(250, 120)); 
         pausePanel.add(wrapperPanel);
         
-        // ELIMINATE LE 3 RIGHE DOPPIE QUI SOTTO!    
-
         upgradeButton = createUpgradeButton();
 
         gamePanel.add(pausePanel);
@@ -144,8 +136,7 @@ public class SwingView implements IView {
     
     @Override
     public void updateUnlockedLevels(int maxUnlockedLevel, java.util.Map<Integer, Integer> levelStars) {
-        
-        String starStyle = "font-family: Arial; font-size: 26px; vertical-align: 2px; color: #FFD700;"; // Aggiunto anche il color oro #FFD700!
+        String starStyle = "font-family: Arial; font-size: 26px; vertical-align: 2px; color: #FFD700;"; 
 
         if (btnLevel1 != null) {
             btnLevel1.setEnabled(maxUnlockedLevel >= 1);
@@ -171,7 +162,6 @@ public class SwingView implements IView {
         }
     }
 
-    // Rimosse le parentesi quadre per un look più pulito e "arcade"
     private String getStarString(int stars) {
         if (stars == 3) return "★★★";
         if (stars == 2) return "★★☆";
@@ -180,59 +170,31 @@ public class SwingView implements IView {
     }
     
     @Override
-    public void addPauseListener(ActionListener listener) {
-    	pauseBtn.addActionListener(listener);
-    }
+    public void addPauseListener(ActionListener listener) { pauseBtn.addActionListener(listener); }
     @Override
-    public void addResumeListener(ActionListener listener) {
-    	resumeBtn.addActionListener(listener);
-    }
+    public void addResumeListener(ActionListener listener) { resumeBtn.addActionListener(listener); }
     @Override
-    public void addRestartListener(ActionListener listener) {
-    	restartBtn.addActionListener(listener);
-    }
+    public void addRestartListener(ActionListener listener) { restartBtn.addActionListener(listener); }
     @Override
-    public void addQuitListener(ActionListener listener) {
-    	quitBtn.addActionListener(listener);
-    }
+    public void addQuitListener(ActionListener listener) { quitBtn.addActionListener(listener); }
+    @Override
+    public void addUpgradeListener(ActionListener listener) { upgradeButton.addActionListener(listener); }    
+    @Override
+    public void addArcherListener(ActionListener listener) { archerButton.addActionListener(listener); }
+    @Override
+    public void addMageListener(ActionListener listener) { mageButton.addActionListener(listener); }
+    @Override
+    public void addBarracksListener(ActionListener listener) { barracksButton.addActionListener(listener); }
+    @Override
+    public void addCannonListener(ActionListener listener) { cannonButton.addActionListener(listener); }
+    @Override
+    public void addRallyListener(ActionListener listener) { rallyButton.addActionListener(listener); }
+    @Override
+    public void addMusicListener(ActionListener listener) { musicButton.addActionListener(listener); }
+    @Override
+    public void addSoundListener(ActionListener listener) { soundButton.addActionListener(listener); }
     
-    @Override
-    public void addUpgradeListener(ActionListener listener) {
-        upgradeButton.addActionListener(listener);
-    }    
-    
-    @Override
-    public void addArcherListener(ActionListener listener) {
-        archerButton.addActionListener(listener);
-    }
-    @Override
-    public void addMageListener(ActionListener listener) {
-        mageButton.addActionListener(listener);
-    }
-    @Override
-    public void addBarracksListener(ActionListener listener) {
-        barracksButton.addActionListener(listener);
-    }
-    @Override
-    public void addCannonListener(ActionListener listener) {
-        cannonButton.addActionListener(listener);
-    }
-    @Override
-    public void addRallyListener(ActionListener listener) {
-        rallyButton.addActionListener(listener);
-    }
-    @Override
-    public void addMusicListener(ActionListener listener) {
-        musicButton.addActionListener(listener);
-    }
-    @Override
-    public void addSoundListener(ActionListener listener) {
-        soundButton.addActionListener(listener);
-    }
-    
-    public JPanel getGamePanel() {
-        return this.gamePanel;
-    }
+    public JPanel getGamePanel() { return this.gamePanel; }
     
     @Override
     public void updateSoundIcon(boolean isMuted) {
@@ -298,12 +260,9 @@ public class SwingView implements IView {
         };
         
         GridBagConstraints gbc = new GridBagConstraints();
-
-        // --- PANNELLO SUPERIORE (Unisce Audio a destra e Back a sinistra) ---
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
 
-        // Sinistra: Bottone Home
         JPanel backContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
         backContainer.setOpaque(false);
         
@@ -311,11 +270,10 @@ public class SwingView implements IView {
         if (homeIcon != null) {
             btnBackMenu.setIcon(scaleIcon(homeIcon, 60, 60));
         } else {
-            // Se l'immagine manca, usa il simbolo Unicode della casetta provvisoriamente!
             btnBackMenu.setText("\u2302"); 
             btnBackMenu.setFont(new Font("Arial", Font.PLAIN, 50));
         }
-        btnBackMenu.setVisible(false); // Inizialmente nascosto
+        btnBackMenu.setVisible(false); 
         
         btnBackMenu.addActionListener(e -> {
             btnStart.setVisible(true);
@@ -327,7 +285,6 @@ public class SwingView implements IView {
         });
         backContainer.add(btnBackMenu);
 
-        // Destra: Pannello Audio
         JPanel audioPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         audioPanel.setOpaque(false);
 
@@ -345,8 +302,6 @@ public class SwingView implements IView {
 
         audioPanel.add(musicButton);
         audioPanel.add(soundButton);
-
-        // Assembliamo il topPanel
         topPanel.add(backContainer, BorderLayout.WEST);
         topPanel.add(audioPanel, BorderLayout.EAST);
        
@@ -362,16 +317,13 @@ public class SwingView implements IView {
         
         gioco.utils.SoundManager.playMusic("/assets/audio/audioMenu.wav");
 
-        // --- BOTTONE START E LIVELLI (Al centro) ---
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setOpaque(false);
         
-        // --- PANNELLO LIVELLI E NUOVO BOTTONE PICCOLO ---
         levelsPanel = new JPanel(new GridBagLayout()); 
         levelsPanel.setOpaque(false); 
         levelsPanel.setVisible(false); 
 
-        // Raggruppiamo i 3 bottoni grandi dei livelli
         JPanel buttonsGrid = new JPanel(new GridLayout(3, 1, 0, 20));
         buttonsGrid.setOpaque(false);
 
@@ -386,21 +338,18 @@ public class SwingView implements IView {
         GridBagConstraints gbcLevels = new GridBagConstraints();
         gbcLevels.gridx = 0;
         gbcLevels.gridy = 0;
-        gbcLevels.insets = new Insets(0, 0, 80, 0); // 80px di spazio tra i livelli e il bottone sotto
+        gbcLevels.insets = new Insets(0, 0, 80, 0); 
         levelsPanel.add(buttonsGrid, gbcLevels);
 
-     // --- CREAZIONE E AGGIUNTA DEL NUOVO BOTTONE (60x60) ---
         JButton btnExtra = createTransparentButton();
         btnExtra.setPreferredSize(new Dimension(60, 60));
         
-        // 1. Carichi l'immagine
         BufferedImage infoIcon = loadImage("/assets/background/button_info.png");
         
-        // 2. LA APPLICHI AL BOTTONE 
         if (infoIcon != null) {
             btnExtra.setIcon(scaleIcon(infoIcon, 60, 60));
         } else {
-            System.out.println("ATTENZIONE: Immagine button_info.png non trovata nel percorso specificato!");
+            System.out.println("ATTENZIONE: Immagine button_info.png non trovata!");
         }
         
         btnExtra.setVisible(true);
@@ -408,9 +357,8 @@ public class SwingView implements IView {
 
         gbcLevels.gridy = 1;
         gbcLevels.insets = new Insets(0, 0, 0, 0);
-        levelsPanel.add(btnExtra, gbcLevels); // <-- TI MANCAVA QUESTA RIGA!
+        levelsPanel.add(btnExtra, gbcLevels); 
 
-        // --- CREAZIONE DELLO START ---
         btnStart = createOvalStartButton("START", "START");
         
         flashTimer = new javax.swing.Timer(600, e -> {
@@ -430,20 +378,16 @@ public class SwingView implements IView {
             btnBackMenu.setVisible(true); 
         });
 
-     // Creiamo dei vincoli specifici per gli elementi dentro il centerPanel
         GridBagConstraints gbcInner = new GridBagConstraints();
         gbcInner.gridx = 0;
         gbcInner.gridy = 0;
         
-        // 1. Aggiungiamo il bottone START senza alterarne la posizione
         gbcInner.insets = new Insets(0, 0, 0, 0);
         centerPanel.add(btnStart, gbcInner);
 
-        // 2. Aggiungiamo i livelli con un margine superiore per spingerli in basso
         gbcInner.insets = new Insets(220, 0, 0, 0); 
         centerPanel.add(levelsPanel, gbcInner);
 
-        // Posizioniamo il contenitore centrale nel menu
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 2;
@@ -451,7 +395,7 @@ public class SwingView implements IView {
         gbc.weighty = 0.9;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(-120, 0, 0, 0); // Sposta in basso tutto il blocco (Start e Livelli)
+        gbc.insets = new Insets(-120, 0, 0, 0); 
         menuPanel.add(centerPanel, gbc);
     }
     
@@ -527,12 +471,9 @@ public class SwingView implements IView {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
-                // Attiviamo l'antialiasing per rendere i bordi dell'ovale perfetti e lisci
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                // Colore di sfondo semitrasparente come gli altri
                 g2.setColor(new Color(0, 0, 0, 180)); 
-                // Disegniamo l'ovale invece del rettangolo!
                 g2.fillOval(0, 0, getWidth(), getHeight());
                 
                 g2.dispose();
@@ -547,7 +488,6 @@ public class SwingView implements IView {
         button.setBorderPainted(false);
         button.setFocusPainted(false);
         button.setActionCommand(command); 
-        // Dimensioni regolate per rendere l'ovale ben proporzionato
         button.setPreferredSize(new Dimension(200, 64)); 
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
@@ -555,20 +495,15 @@ public class SwingView implements IView {
     }
     
     private void showInfoDialog() {
-        // 1. Creiamo un JDialog modale senza collegarlo a un parent specifico
         JDialog infoDialog = new JDialog((java.awt.Frame) null, "Info", JDialog.ModalityType.APPLICATION_MODAL);
         infoDialog.setUndecorated(true); 
         infoDialog.setSize(500, 380);
-        infoDialog.setLocationRelativeTo(null); // Centra il popup al centro dello schermo
+        infoDialog.setLocationRelativeTo(null); 
         
-        // ... (il resto del codice del pannello e dei testi rimane identico) ...
-        
-        // 2. Pannello principale scuro
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(new Color(35, 35, 35)); 
         contentPanel.setBorder(BorderFactory.createLineBorder(new Color(120, 120, 120), 2)); 
         
-        // --- 3. PANNELLO SUPERIORE (TASTO INDIETRO) ---
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         topPanel.setOpaque(false); 
         
@@ -584,26 +519,21 @@ public class SwingView implements IView {
         topPanel.add(btnBack);
         contentPanel.add(topPanel, BorderLayout.NORTH);
         
-        // --- 4. PANNELLO CENTRALE (TESTO SENZA HTML) ---
-        // Usiamo BoxLayout per impilare le etichette una sotto l'altra
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
         textPanel.setOpaque(false);
-        textPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20)); // Margini interni
+        textPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20));
         
-        // TITOLO (Applica qui il font del tuo titolo!)
         JLabel lblTitle = new JLabel("I nemici non devono passare!");
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 24)); // <--- Sostituisci questo con il tuo font!
-        lblTitle.setForeground(new Color(255, 215, 0)); // Giallo Oro
-        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrato
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 24));
+        lblTitle.setForeground(new Color(255, 215, 0)); 
+        lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT); 
         
-        // SOTTOTITOLO
         JLabel lblDesc = new JLabel("SUGGERIMENTI");
-        lblDesc.setFont(new Font("Arial", Font.PLAIN, 14)); // <--- Puoi usare il tuo font anche qui
+        lblDesc.setFont(new Font("Arial", Font.PLAIN, 14)); 
         lblDesc.setForeground(Color.WHITE);
         lblDesc.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        // ELENCO DELLE TORRI (Usiamo un GridLayout per distanziarle bene)
         JPanel towersPanel = new JPanel(new GridLayout(4, 1, 0, 10)); 
         towersPanel.setOpaque(false);
         towersPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
@@ -613,28 +543,20 @@ public class SwingView implements IView {
         towersPanel.add(createCustomLabel("🔮MAGO: attacchi letali, indispensabile contro gli Orchi."));
         towersPanel.add(createCustomLabel("💣CANNONE: danni ad area contro gli sciami nemici."));
       
-        
-        // Assemblaggio finale del testo
         textPanel.add(lblTitle);
-        textPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Crea uno spazio vuoto tra titolo e descrizione
+        textPanel.add(Box.createRigidArea(new Dimension(0, 10))); 
         textPanel.add(lblDesc);
         textPanel.add(towersPanel);
         
         contentPanel.add(textPanel, BorderLayout.CENTER);
         
-        // 5. Mostriamo a schermo
         infoDialog.setContentPane(contentPanel);
         infoDialog.setVisible(true);
     }
     
-    // Metodo di supporto per generare le scritte delle torri senza ripetere il codice
     private JLabel createCustomLabel(String text) {
-        // Avvolgiamo il testo in HTML e specifichiamo i font nativi per le emoji come priorità
         String htmlText = "<html><span style='font-family: \"Segoe UI Emoji\", \"Apple Color Emoji\", Arial; font-size: 14px; color: white;'>" + text + "</span></html>";
-        
         JLabel label = new JLabel(htmlText);
-        // Non serve più impostare .setFont() o .setForeground() qui, 
-        // perché se ne occupa direttamente lo stile CSS dell'HTML!
         return label;
     }
 
@@ -643,6 +565,11 @@ public class SwingView implements IView {
         private Map<Integer, BufferedImage[]> towerAssets = new HashMap<>();
         private Map<Integer, BufferedImage> projectileAssets = new HashMap<>();
         private Map<Integer, BufferedImage[]> enemyAssets = new HashMap<>();
+        
+        private Map<Integer, BufferedImage[]> enemyAttackAssets = new HashMap<>();
+        private Map<Integer, BufferedImage[]> enemyDeathAssets = new HashMap<>();
+        private BufferedImage[] soldierDeathFrames = new BufferedImage[20];
+        
         private BufferedImage lifespan, redBar;
         private BufferedImage hoveredSlot;
         private BufferedImage[] soldierFrames = new BufferedImage[20];
@@ -683,41 +610,83 @@ public class SwingView implements IView {
             redBar = loadImage("/assets/HEALTHBAR/health_bar-04.png");
             hoveredSlot = loadImage("/assets/background/39.png");
 
+            // --- CARICAMENTO SOLDATI ---
             for (int i = 0; i < 20; i++) {
+                // Tutte le animazioni dei soldati partono da 000
                 soldierFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_%03d.png", i));
-            }
-            for (int i = 0; i < 20; i++) {
                 soldierIdleFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_idle_%03d.png", i));
-            }
-            for(int i = 0;i < 20; i++) {
-            	soldierFightFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_attack_%03d.png", i));
+                soldierFightFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_attack_%03d.png", i));
+                soldierDeathFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_die_%03d.png", i));
             }
             
+            // --- CARICAMENTO ORCO ---
             BufferedImage[] orcFrames = new BufferedImage[19];
             for (int i = 0; i < 19; i++) {
+                // Walk parte da 001 (i + 1)
                 orcFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_walk_%03d.png", i + 1));
             }
+            BufferedImage[] orcAttackFrames = new BufferedImage[20];
+            BufferedImage[] orcDeathFrames = new BufferedImage[20];
+            for (int i = 0; i < 20; i++) {
+                // Attack e Die partono da 000 (i)
+                orcAttackFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_attack_%03d.png", i));
+                orcDeathFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_die_%03d.png", i));
+            }
             enemyAssets.put(Enemy.ORC_TYPE, orcFrames);
-            enemyAssets.put(4, orcFrames);
+            enemyAttackAssets.put(Enemy.ORC_TYPE, orcAttackFrames);
+            enemyDeathAssets.put(Enemy.ORC_TYPE, orcDeathFrames);
             
+            // --- CARICAMENTO SCORPIONE ---
             BufferedImage[] scorpionFrames = new BufferedImage[10];
             for (int i = 0; i < 10; i++) {
+                // Walk parte da 001
                 scorpionFrames[i] = loadImage(String.format("/assets/SCORPION/1_enemies_1_walk_%03d.png", i + 1));
             }
+            BufferedImage[] scorpionAttackFrames = new BufferedImage[10];
+            BufferedImage[] scorpionDeathFrames = new BufferedImage[10];
+            for (int i = 0; i < 10; i++) {
+                // Attack e Die partono da 000
+                scorpionAttackFrames[i] = loadImage(String.format("/assets/SCORPION/1_enemies_1_attack_%03d.png", i));
+                scorpionDeathFrames[i] = loadImage(String.format("/assets/SCORPION/1_enemies_1_die_%03d.png", i));
+            }
             enemyAssets.put(Enemy.SCORPION_TYPE, scorpionFrames);
+            enemyAttackAssets.put(Enemy.SCORPION_TYPE, scorpionAttackFrames);
+            enemyDeathAssets.put(Enemy.SCORPION_TYPE, scorpionDeathFrames);
             
+            // --- CARICAMENTO GOBLIN ---
             BufferedImage[] goblinFrames = new BufferedImage[15];
             for (int i = 0; i < 15; i++) {
+                // Walk parte da 001
                 goblinFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_walk_%03d.png", i + 1));
             }
+            BufferedImage[] goblinAttackFrames = new BufferedImage[15];
+            BufferedImage[] goblinDeathFrames = new BufferedImage[15];
+            for (int i = 0; i < 15; i++) {
+                // Attack e Die partono da 000
+                goblinAttackFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_attack_%03d.png", i));
+                goblinDeathFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_die_%03d.png", i));
+            }
             enemyAssets.put(Enemy.GOBLIN_TYPE, goblinFrames);
+            enemyAttackAssets.put(Enemy.GOBLIN_TYPE, goblinAttackFrames);
+            enemyDeathAssets.put(Enemy.GOBLIN_TYPE, goblinDeathFrames);
             
-            
+            // --- CARICAMENTO BOSS (YETI) ---
             BufferedImage[] bossFrames = new BufferedImage[9];
             for (int i = 0; i < 9; i++) {
+                // Walk parte da 001
                 bossFrames[i] = loadImage(String.format("/assets/BOSS/2_enemies_1_WALK_%03d.png", i + 1));
             }
-            enemyAssets.put(Enemy.YETI_TYPE, bossFrames);
+            BufferedImage[] bossAttackFrames = new BufferedImage[10];
+            BufferedImage[] bossDeathFrames = new BufferedImage[10];
+            for (int i = 0; i < 10; i++) {
+                // Attack e Die partono da 000
+                bossAttackFrames[i] = loadImage(String.format("/assets/BOSS/2_enemies_1_ATTACK_%03d.png", i));
+                bossDeathFrames[i] = loadImage(String.format("/assets/BOSS/2_enemies_1_DIE_%03d.png", i));
+            }
+            enemyAssets.put(4, bossFrames);
+            enemyAttackAssets.put(4, bossAttackFrames);
+            enemyDeathAssets.put(4, bossDeathFrames);
+
             try {
                 java.io.InputStream is = getClass().getResourceAsStream("/assets/background/Grandover.ttf");
                 font = Font.createFont(Font.TRUETYPE_FONT, is);
@@ -1007,7 +976,10 @@ public class SwingView implements IView {
                 
                 BufferedImage imgToDraw = null;
 
-                if (s.isMoving() && soldierFrames != null && soldierFrames[0] != null) {
+                if (s.isDead() && soldierDeathFrames != null && soldierDeathFrames[0] != null) {
+                    int frameIndex = Math.min((s.getDeathTickCounter() / 2), soldierDeathFrames.length - 1);
+                    imgToDraw = soldierDeathFrames[frameIndex];
+                } else if (s.isMoving() && soldierFrames != null && soldierFrames[0] != null) {
                     int frameIndex = (s.getTikCounter() / 2) % soldierFrames.length;
                     imgToDraw = soldierFrames[frameIndex];
                 } else if (s.isBusy() && soldierFightFrames != null && soldierFightFrames[0] != null) {
@@ -1036,7 +1008,10 @@ public class SwingView implements IView {
                     g.setColor(Color.RED); 
                     g.fillOval(sx - 12, sy - 12, 24, 24);
                 }
-                drawHealthBar(g, shadowX, sy - 25, s.getHealth(), s.getMaxHealth());
+                
+                if (!s.isDead()) {
+                    drawHealthBar(g, shadowX, sy - 25, s.getHealth(), s.getMaxHealth());
+                }
             }
         }
 
@@ -1045,18 +1020,14 @@ public class SwingView implements IView {
                 int ex = (int) e.getX();
                 int ey = (int) e.getY();
                 
-                // 1. Controlliamo se è il Boss
-                boolean isBoss = (e.getType() == Enemy.YETI_TYPE);
+                boolean isBoss = (e.getType() == 4);
                 
-                // 2. Impostiamo dimensioni dinamiche (72x72 per il Boss, 36x36 per i normali)
                 int drawW = isBoss ? 72 : 36;
                 int drawH = isBoss ? 72 : 36;
                 
-                // 3. Ricalcoliamo il centro per far camminare il Boss esattamente sul sentiero
                 int drawX = ex - (drawW / 2);
                 int drawY = ey - (drawH / 2);
                 
-                // 4. Adattiamo l'ombra (più grande e spostata più in basso per il Boss)
                 int shadowW = isBoss ? 28 : 14;
                 int shadowH = isBoss ? 16 : 10;
                 int shadowX = e.isFacingRight() ? (ex - (shadowW / 2) - 4) : (ex - (shadowW / 4));
@@ -1065,12 +1036,30 @@ public class SwingView implements IView {
                 g.setColor(new Color(0, 0, 0, 80)); 
                 g.fillOval(shadowX, shadowY, shadowW, shadowH);
                 
-                BufferedImage[] frames = enemyAssets.get(e.getType());
-                if (frames != null && frames.length > 0) {
-                    // Rallentiamo leggermente l'animazione del Boss dividendola per 4 invece che per 2, 
-                    // così i suoi passi sembreranno più pesanti!
-                    int animationSpeed = isBoss ? 4 : 2; 
-                    int frameIndex = (e.getTikCounter() / animationSpeed) % frames.length; 
+                BufferedImage[] frames = null;
+                boolean playOnce = false;
+                int frameIndex = 0;
+                int animationSpeed = isBoss ? 4 : 2; 
+
+                if (e.isDying()) {
+                    frames = enemyDeathAssets.get(e.getType());
+                    playOnce = true;
+                    if (frames != null) {
+                        frameIndex = Math.min((e.getDeathTickCounter() / animationSpeed), frames.length - 1);
+                    }
+                } else if (e.isBlocked()) { 
+                    frames = enemyAttackAssets.get(e.getType());
+                    if (frames != null) {
+                        frameIndex = (e.getTikCounter() / animationSpeed) % frames.length;
+                    }
+                } else {
+                    frames = enemyAssets.get(e.getType()); 
+                    if (frames != null) {
+                        frameIndex = (e.getTikCounter() / animationSpeed) % frames.length;
+                    }
+                }
+
+                if (frames != null && frames.length > 0 && frames[frameIndex] != null) {
                     BufferedImage imgToDraw = frames[frameIndex];
                     
                     if (e.isFacingRight()) {
@@ -1086,9 +1075,10 @@ public class SwingView implements IView {
                     g.fillOval(drawX, drawY, drawW, drawH);
                 }
                 
-                // 5. Alziamo la barra della vita del Boss in modo che galleggi sopra la sua testa
-                int healthBarY = ey - (isBoss ? 45 : 25);
-                drawHealthBar(g, shadowX, healthBarY, e.getHealth(), e.getMaxHealth());
+                if (!e.isDying()) {
+                    int healthBarY = ey - (isBoss ? 45 : 25);
+                    drawHealthBar(g, shadowX, healthBarY, e.getHealth(), e.getMaxHealth());
+                }
             }
         }
         

@@ -1,7 +1,5 @@
 package gioco.model;
 
-import java.util.List;
-
 public class Soldier {
 
 	private double x, y;
@@ -18,16 +16,18 @@ public class Soldier {
 	private int tikCounter=0;
 	private Tower parentTower;
 	private boolean isFacingRight = true;
-
 	
+	// --- NUOVO CONTATORE MORTE ---
+	private int deathTickCounter = 0;
+
 	public Soldier(double x, double y, int formationIndex, Tower parentTower) {
 		this.x = x;
 		this.y = y;
 		
-		 
-		
-		this.attackCooldown = 30; // Colpiscono velocemente per "distrarre" il nemico
-		this.damage = 3; // <-- MANTENUTO A 3. Il loro scopo è bloccare, non uccidere.
+		this.maxHealth = 60; 
+		this.health = this.maxHealth;
+		this.attackCooldown = 30; 
+		this.damage = 3; 
 		
 		this.currentCooldown = 0;
 		this.target = null;	
@@ -36,69 +36,45 @@ public class Soldier {
 		this.formationIndex = formationIndex;
 		this.parentTower = parentTower;
 		
-		// 1. Leggiamo il livello attuale della torre
 		int towerLvl = parentTower.getLvl();
 		
-		// 2. Impostiamo le statistiche in base al livello
 		if (towerLvl == 1) {
-			this.maxHealth = 80;
+			this.maxHealth = 60;
 			this.damage = 5;
 		} else if (towerLvl == 2) {
-			this.maxHealth = 115;
+			this.maxHealth = 100;
 			this.damage = 10;
 		} else if (towerLvl == 3) {
-			this.maxHealth = 165;
+			this.maxHealth = 150;
 			this.damage = 18;
 		}
-		this.health = this.maxHealth;
 	}
 	
-	
-	public int getFormationIndex() {
-		return this.formationIndex;
-	}
-	
-	public Tower getParentTower() {
-		return this.parentTower;
-	}
-	
-	public int getTikCounter() {
-		return this.tikCounter;
-	}
-	
-	public boolean isFacingRight() {
-		return this.isFacingRight;
-	}
+	public int getFormationIndex() { return this.formationIndex; }
+	public Tower getParentTower() { return this.parentTower; }
+	public int getTikCounter() { return this.tikCounter; }
+	public boolean isFacingRight() { return this.isFacingRight; }
 	
 	public void setDestination(Point destination) {
-		
 		if (this.target != null) {
-	        this.target.setBlocked(false); // Il nemico torna a camminare
-	        this.target = null;            // Il soldato non ha più un bersaglio
+	        this.target.setBlocked(false); 
+	        this.target = null;            
 	    }
-		
 		this.destX = destination.getX();
 		this.destY = destination.getY();
 		this.isMoving = true;
 		this.target = null;
 	}
 	
-	public boolean isMoving() {
-		return this.isMoving;
-	}
+	public boolean isMoving() { return this.isMoving; }
 	
 	public void move() {
-		
 		double dx = destX - x;
 		double dy = destY - y;
-		
 		double distance = Math.hypot(dx, dy);
 		
-		if (dx != 0) {
-		    this.isFacingRight = (dx > 0);
-		}
+		if (dx != 0) this.isFacingRight = (dx > 0);
 
-		// 2. Movimento fisico
 		if (distance <= this.speed) {
 		    this.x = destX;
 		    this.y = destY;
@@ -109,37 +85,18 @@ public class Soldier {
 		}	
 	}
 	
-	public double getX() {
-		return this.x;
-	}
+	public double getX() { return this.x; }
+	public double getY() { return this.y; }
+	public int getHealth() { return this.health; }
+	public int getCurrentCooldown() { return this.currentCooldown; }
+	public int getMaxHealth() { return maxHealth; }
 	
 	public boolean isBusy() {
         return this.target != null && !this.target.isDead();
     }
 	
-	public double getY() {
-		return this.y;
-	}
-	
-	public int getHealth() {
-		return this.health;
-	}
-	
-	public int getCurrentCooldown() {
-		return this.currentCooldown;
-	}
-	
-	public int getMaxHealth() {
-		return maxHealth; 
-	}
-	
-    public boolean isDead() {
-    	return health <= 0;
-    }
-    
-    public Enemy getEnemy() {
-    	return this.target;
-    }
+    public boolean isDead() { return health <= 0; }
+    public Enemy getEnemy() { return this.target; }
     
     public void setTarget(Enemy enemy) {
     	this.target = enemy;
@@ -148,12 +105,11 @@ public class Soldier {
     	}
     }
     
-    public void takeDamage(int amount) {
-    	this.health -= amount;
-    }
+    public void takeDamage(int amount) { this.health -= amount; }
     
     public void fight() {
     	if(target != null) {
+    		this.isFacingRight = (target.getX() > this.x);
     		if(currentCooldown <= 0) {
     			target.takeDamage(damage);
     			currentCooldown = attackCooldown;
@@ -170,18 +126,17 @@ public class Soldier {
 		int oldMaxHealth = this.maxHealth;
 		
 		if (newLvl == 2) {
-			this.maxHealth = 115;
-			this.damage = 10;
+			this.maxHealth = 100;
+			this.damage = 6;
 		} else if (newLvl == 3) {
-			this.maxHealth = 165;
-			this.damage = 18;
+			this.maxHealth = 150;
+			this.damage = 10;
 		}
-		
-		// Aumentiamo la vita attuale del soldato dello stesso quantitativo di vita massima guadagnata
 		this.health += (this.maxHealth - oldMaxHealth); 
 	}
     
-    public void updateTikCounter() {
-    	tikCounter++;
-    }
+    public void updateTikCounter() { tikCounter++; }
+    
+    public int getDeathTickCounter() { return deathTickCounter; }
+    public void incrementDeathTick() { this.deathTickCounter++; }
 }

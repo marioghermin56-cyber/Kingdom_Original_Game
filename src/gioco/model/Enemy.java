@@ -3,13 +3,17 @@ package gioco.model;
 import java.util.List;
 
 public class Enemy {
-
 	
 	public static final int GOBLIN_TYPE = 1;
+	public static final int BLACKWIZARD_TYPE = 2;
+	public static final int DARKGIANT_TYPE = 3;
+	public static final int BLADESWORDSMAN_TYPE = 4;
+	public static final int GHOST_TYPE = 5;
+	public static final int LITTLEDEVIL_TYPE = 6;
 	public static final int ORC_TYPE = 7;
 	public static final int SCORPION_TYPE = 8;
-	public static final int YETI_TYPE = 9;
-	
+	public static final int SKINHEAD_TYPE = 9;
+	public static final int DEADSWORDSMAN_TYPE = 10;
 	
 	private double x, y;
 	private int health;
@@ -26,9 +30,13 @@ public class Enemy {
 	private int attackCooldown;
 	private int currentCooldown;
 	private boolean isFacingRight = true;
-	private int goldReward;
 	
-	public Enemy(int health, double speed, EnemyPath path, int value, int type, int tikCounter, int attackDamage, int attackCooldown, int goldReward) {
+	// --- NUOVE VARIABILI PER LE ANIMAZIONI ---
+	private boolean isAttacking = false;
+	private boolean isDying = false;
+	private int deathTickCounter = 0;
+	
+	public Enemy(int health, double speed, EnemyPath path, int value, int type, int tikCounter, int attackDamage, int attackCooldown) {
 		this.health = health;
 		this.maxHealth = health;
 		this.speed = speed;
@@ -41,15 +49,12 @@ public class Enemy {
 		this.attackDamage = attackDamage;
 		this.attackCooldown = attackCooldown;
 		this.currentCooldown = attackCooldown;
-		this.goldReward = goldReward;
-		
 		
 		if(path != null && !path.getWaypoints().isEmpty()) {
 			gioco.model.Point spawnPoint = path.getWaypoints().get(0);
 			this.x = spawnPoint.getX();
 			this.y = spawnPoint.getY();
 		}
-		
 	}
 	
 	public boolean isFacingRight() {
@@ -110,6 +115,11 @@ public class Enemy {
 	
 	public void takeDamage(int amount) {
 		this.health -= amount;
+        // Se la vita scende a 0 e non stava già morendo, attiva lo stato
+        if (this.health <= 0 && !this.isDying) {
+            this.health = 0;
+            this.isDying = true;
+        }
 	}
 	
 	public boolean isDead() {
@@ -120,41 +130,55 @@ public class Enemy {
 		this.isBlocked = blocked;
 	}
 	
-	public int getGoldReward() {
-		return this.goldReward;
-	}
+    // --- NUOVI METODI PER GESTIRE GLI STATI ---
+    public boolean isAttacking() { return isAttacking; }
+    public void setAttacking(boolean attacking) { this.isAttacking = attacking; }
+
+    public boolean isDying() { return isDying; }
+    
+    public int getDeathTickCounter() { return deathTickCounter; }
+    public void incrementDeathTick() { this.deathTickCounter++; }
 	
-public void move() {
-		
+    public void move() {
+        // Se sta morendo, aumenta il contatore dell'animazione e non muoverti
+        if (isDying) {
+            incrementDeathTick();
+            return;
+        }
+
+        // FONDAMENTALE: Aumentiamo SEMPRE il tikCounter prima dei blocchi. 
+        // In questo modo, anche se il nemico è fermo a combattere, 
+        // il suo "orologio" interno continua a girare, permettendo all'animazione di scorrere.
+        this.tikCounter++;
+
 		if(isBlocked || hasReachedEnd()) {
-			return; // Se è bloccato o arrivato alla fine, non fa nulla
+			return; 
 		}
 		
-		// Peschiamo il prossimo punto da raggiungere
 		Point target = path.getWaypoints().get(targetWayPointIndex);
 		
-		// Calcoliamo le distanze su asse X e Y
 		double dx = target.getX() - this.x;
 		double dy = target.getY() - this.y;
 		
-		// Teorema di Pitagora per trovare la distanza totale in linea retta
 		double distance = Math.sqrt((dx * dx) + (dy * dy));
 		
 		if (dx != 0) {
 		    this.isFacingRight = (dx > 0);
 		}
-		// Se la distanza rimanente è minore della nostra velocità, siamo arrivati al waypoint!
+		
 		if (distance <= speed) {
 			this.x = target.getX();
 			this.y = target.getY();
-			targetWayPointIndex++; // Puntiamo al prossimo waypoint!
+			targetWayPointIndex++; 
 		} else {
-			// Altrimenti, facciamo un passo verso il waypoint.
-			// (dx / distance) e (dy / distance) creano il vettore normalizzato
 			this.x += (dx / distance) * speed;
 			this.y += (dy / distance) * speed;
 		}
-		
-		this.tikCounter++;
 	}
+    public void setY(double y) {
+        this.y = y;
+    }
+    public void setFacingRight(boolean facingRight) {
+        this.isFacingRight = facingRight;
+    }
 }

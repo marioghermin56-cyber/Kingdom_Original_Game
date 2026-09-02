@@ -10,7 +10,6 @@ public class KingdomRushModel implements IModel{
 	private boolean gameOver;
 	private List<TowerSlot> slots;
 	private List<Enemy> enemies;
-    //private List<Point> enemyPath;
     private List<Wave> waves;
     private int currentWaveIndex;
     private int spawnTimer;
@@ -110,19 +109,14 @@ public class KingdomRushModel implements IModel{
 
 	    Tower tower = activeBarracksSlot.getTower();
 
-	    // 1. Calcoliamo il vero centro della piazzola (come nella View)
 	    int cx = activeBarracksSlot.getX() + (activeBarracksSlot.getWidth() / 2);
 	    int cy = activeBarracksSlot.getY() + (activeBarracksSlot.getHeight() / 2);
 
-	    // 2. Calcoliamo se il click è dentro al range partendo dal CENTRO
 	    double distToTower = Math.hypot(logicalX - cx, logicalY - cy);
 
-	    // Usa tower.getRange() se la tua torre ha quel getter, oppure lascia 200!
 	    if (distToTower <= tower.getRange()) {
-	        
 	        tower.setRallyPoint(new Point(logicalX, logicalY));
 
-	        // 3. IL FIX DEI SOLDATI: Troviamo i nostri soldati tramite la carta d'identità
 	        List<Soldier> mySoldiers = new ArrayList<>();
 	        for (Soldier s : activeSoldiers) {
 	            if (s.getParentTower() == tower) {
@@ -130,20 +124,17 @@ public class KingdomRushModel implements IModel{
 	            }
 	        }
 
-	        // 4. Assegniamo le nuove destinazioni sfalsate per tenerli in formazione
-	        if (mySoldiers.size() > 0) mySoldiers.get(0).setDestination(new Point(logicalX - 10, logicalY - 10));
-	        if (mySoldiers.size() > 1) mySoldiers.get(1).setDestination(new Point(logicalX + 10, logicalY - 10));
-	        if (mySoldiers.size() > 2) mySoldiers.get(2).setDestination(new Point(logicalX, logicalY + 10));
+	        if (mySoldiers.size() > 0) mySoldiers.get(0).setDestination(new Point(logicalX + 15, logicalY));
+	        if (mySoldiers.size() > 1) mySoldiers.get(1).setDestination(new Point(logicalX - 10, logicalY - 15));
+	        if (mySoldiers.size() > 2) mySoldiers.get(2).setDestination(new Point(logicalX - 10, logicalY + 15));
 	    }
 
-	    // A prescindere che il click fosse valido o fuori range, usciamo dalla modalità
 	    isSettingRallyPoint = false;
 	    activeBarracksSlot = null;
 	}
 	
 	@Override
-public void upgradeSelectedTower() {
-		
+    public void upgradeSelectedTower() {
 		TowerSlot slot = getSelectedBuildSlot();
 		
 		if(slot != null && slot.isOccupied()) {
@@ -153,7 +144,6 @@ public void upgradeSelectedTower() {
 				this.gold -= tower.getUpgradeCost();
 				tower.upgradeTower();
 				
-				// --- NUOVO: SE E' UNA CASERMA, POTENZIA I SOLDATI GIA' VIVI ---
 				if (tower.getType() == Tower.BARRACKS_TYPE) {
 					for (Soldier s : activeSoldiers) {
 						if (s.getParentTower() == tower) {
@@ -161,8 +151,6 @@ public void upgradeSelectedTower() {
 						}
 					}
 				}
-				// --------------------------------------------------------------
-				
 				deselectBuildSlot();
 			}
 		}
@@ -176,69 +164,42 @@ public void upgradeSelectedTower() {
 		
 		int cost = 0;
 		
-		if(towerType.equals("ARCHER")) {
-			cost = Tower.ARCHER_BASE_COST;
-		}else if(towerType.equals("MAGE")) {
-			cost = Tower.MAGE_BASE_COST;
-		}else if(towerType.equals("CANNON")) {
-			cost = Tower.CANNON_BASE_COST;
-		}else if(towerType.equals("BARRACKS")) {
-			cost = Tower.BARRACKS_BASE_COST;
-		}
+		if(towerType.equals("ARCHER")) cost = Tower.ARCHER_BASE_COST;
+		else if(towerType.equals("MAGE")) cost = Tower.MAGE_BASE_COST;
+		else if(towerType.equals("CANNON")) cost = Tower.CANNON_BASE_COST;
+		else if(towerType.equals("BARRACKS")) cost = Tower.BARRACKS_BASE_COST;
 		
 		if(gold >= cost) {
 			gold -= cost;
 			
-			// Parametri Tower: (danno, raggio, cooldown, tipo)
-			if(towerType.equals("ARCHER")) {
-				// Danno 12, Raggio ORIGINALE 220, Cooldown 30
-				slots.setTower(new Tower(12, 220, 30, Tower.ARCHER_TYPE));
-			}else if(towerType.equals("MAGE")) {
-				// Danno 55, Raggio ORIGINALE 130, Cooldown 90
-				slots.setTower(new Tower(55, 130, 90, Tower.MAGE_TYPE));
-			}else if(towerType.equals("CANNON")) {
-				// Danno 28, Raggio ORIGINALE 150, Cooldown 120
-				slots.setTower(new Tower(28, 150, 120, Tower.CANNON_TYPE));
-			}else if(towerType.equals("BARRACKS")) {
-				// Danno 0, Raggio ORIGINALE 150, Respawn 600
-				slots.setTower(new Tower(0, 150, 600, Tower.BARRACKS_TYPE));
-			}
+			if(towerType.equals("ARCHER")) slots.setTower(new Tower(12, 220, 30, Tower.ARCHER_TYPE));
+			else if(towerType.equals("MAGE")) slots.setTower(new Tower(55, 130, 90, Tower.MAGE_TYPE));
+			else if(towerType.equals("CANNON")) slots.setTower(new Tower(28, 150, 120, Tower.CANNON_TYPE));
+			else if(towerType.equals("BARRACKS")) slots.setTower(new Tower(0, 150, 600, Tower.BARRACKS_TYPE));
 			return true;
 		}
 		return false;	
 	}
 	
 	@Override
-	public List<Projectile> getActiveProjectiles(){
-		return projectiles;
-	}
+	public List<Projectile> getActiveProjectiles(){ return projectiles; }
 	
 	@Override
-	public List<Enemy> getActiveEnemies(){
-		return enemies;
-	}
+	public List<Enemy> getActiveEnemies(){ return enemies; }
+	
 	@Override
-	public TowerSlot getActiveBarracksSlot() {
-		return this.activeBarracksSlot;
-	}
+	public TowerSlot getActiveBarracksSlot() { return this.activeBarracksSlot; }
 	
-	public List<Soldier> getActiveSoldier(){
-		return activeSoldiers;
-	}
+	public List<Soldier> getActiveSoldier(){ return activeSoldiers; }
 	
-	public int getCurrentWaveNumber() {
-		return currentWaveIndex + 1;
-	}
+	public int getCurrentWaveNumber() { return currentWaveIndex + 1; }
 	
-	public int getTotalWaves() {
-		return waves.size();
-	}
+	public int getTotalWaves() { return waves.size(); }
 	
 	@Override
 	public void updateGame() {
 		if (gameOver || paused) return;
 
-		// 1. ECCO LE LISTE TEMPORANEE! (Vengono create qui dentro ad ogni "tick")
 		List<Soldier> soldiersToAdd = new ArrayList<>();
 		List<Soldier> soldiersToRemove = new ArrayList<>();
 		List<Enemy> enemiesToAdd = new ArrayList<>();
@@ -247,16 +208,30 @@ public void upgradeSelectedTower() {
 		List<Projectile> projectilesToRemove = new ArrayList<>();
 
 		// 2. MOVIMENTO E MORTE NEMICI
+		// 2. MOVIMENTO E MORTE NEMICI
 		for (Enemy enemy : enemies) {
-			enemy.move();
+		    enemy.move();
 
-			if (enemy.hasReachedEnd()) {
-				subtractPlayerHealth(enemy.getValue());
-				enemiesToRemove.add(enemy); // Invece di cancellarlo subito, lo mettiamo in lista
-			} else if (enemy.isDead()) {
-				addGold(enemy.getGoldReward());
-				enemiesToRemove.add(enemy);
-			}
+		    // Controlliamo PRIMA se è arrivato alla fine del percorso
+		    if (enemy.hasReachedEnd()) {
+		        
+		        // Se è arrivato ed è il Boss (tipo 4), toglie 5 vite
+		        if (enemy.getType() == 4) {
+		            subtractPlayerHealth(5);
+		        } else {
+		            // Tutti gli altri nemici tolgono 1 vita
+		            subtractPlayerHealth(1);
+		        }
+		        enemiesToRemove.add(enemy); 
+		        
+		    } else if (enemy.isDying()) {
+		        if (enemy.getDeathTickCounter() == 1) {
+		            addGold(enemy.getValue());
+		        }
+		        if (enemy.getDeathTickCounter() >= 40) {
+		            enemiesToRemove.add(enemy);
+		        }
+		    }
 		}
 		
 		// 3. TORRI E CASERME
@@ -271,10 +246,7 @@ public void upgradeSelectedTower() {
 						if (soldier.getParentTower() == tower) {
 							numSoldiers++;
 							occupiedIndex[soldier.getFormationIndex()] = true;
-							if(numSoldiers >= 3) {
-								break;
-							}
-							
+							if(numSoldiers >= 3) break;
 						}
 					}
 					
@@ -286,7 +258,6 @@ public void upgradeSelectedTower() {
 							double spawnY = slot.getY() + 30;
 							
 							int freeIndex = 0;
-							
 							for(int i = 0; i < 3; i++) {
 								if(!occupiedIndex[i]) {
 									freeIndex = i;
@@ -296,24 +267,12 @@ public void upgradeSelectedTower() {
 						
 							double offsetX = 0;
 							double offsetY = 0;
+							if (freeIndex == 0) { offsetX = 15; offsetY = 0; }
+							else if (freeIndex  == 1) { offsetX = -10; offsetY = -15; }
+							else if (freeIndex == 2) { offsetX = -10; offsetY = 15; }
 							
-							if (freeIndex == 0) {
-								offsetX = -10;
-								offsetY = -10;
-								}
-							else if (freeIndex  == 1) { 
-								offsetX = 10;
-								offsetY = -10; 
-								}
-							else if (freeIndex == 2) { 
-								offsetX = 0;
-								offsetY = 10; 
-								}
-							
-							// C. CREIAMO IL SOLDATO DANDOGLI LA SUA "MATRICOLA"
 							Soldier newSoldier = new Soldier(spawnX, spawnY, freeIndex, tower);
 							soldiersToAdd.add(newSoldier);
-							
 							
 							Point rp = tower.getRallyPoint();
 							if (rp == null) {
@@ -332,27 +291,21 @@ public void upgradeSelectedTower() {
 							}
 						}
 					} else {
-						// SE CI SONO TUTTI E 3 I SOLDATI, IL TIMER SI FERMA A 240
 						tower.setInitialTrainingDone(true);
 						tower.setCooldown(240);
 					}				
-				
-				} else { // Se è una torre d'attacco (non Caserma)
+				} else { 
 				    if (tower.canShoot()) {
 				        for (Enemy enemy : enemies) {
 				            if (!enemy.isDead() && !enemiesToRemove.contains(enemy)) {
-				            	// CALCOLO DAL CENTRO (Sincronizza logica e grafica)
 				                double towerCenterX = slot.getX() + (slot.getWidth() / 2.0);
 				                double towerCenterY = slot.getY() + (slot.getHeight() / 2.0);
-				                // MODIFICA QUI: Rimosso il + 18.0. e.getX() e e.getY() sono già il centro
 				                double enemyCenterX = enemy.getX(); 
 				                double enemyCenterY = enemy.getY();
 				                
 				                double distance = Math.hypot(enemyCenterX - towerCenterX, enemyCenterY - towerCenterY);
 				                
 				                if (distance <= tower.getRange()) {
-				                    
-				                    // Ripristiniamo la partenza dalla punta della torre per la grafica
 				                    double spawnX = towerCenterX; 
 				                    double spawnY = slot.getY() - 15; 
 				                    
@@ -374,14 +327,20 @@ public void upgradeSelectedTower() {
 			}
 		}
 		
+		// 4. SOLDATI
 		for (Soldier soldier : activeSoldiers) {
-			
 			soldier.updateTikCounter();
+			
 			if(soldier.isDead()) {
 				if (soldier.getEnemy() != null) {
-					soldier.getEnemy().setBlocked(false); 
+					soldier.getEnemy().setBlocked(false);
+                    soldier.setTarget(null); 
 				}
-				soldiersToRemove.add(soldier);
+                
+                soldier.incrementDeathTick();
+                if (soldier.getDeathTickCounter() >= 40) {
+				    soldiersToRemove.add(soldier);
+                }
 				continue;
 			}
 			
@@ -391,31 +350,31 @@ public void upgradeSelectedTower() {
 			}
 			
 			if(!soldier.isBusy()) {
-				
 				soldier.setTarget(null);
 				
 				for(Enemy enemy : enemies) {
-					if(!enemy.isDead() && !enemy.isBlocked() && !enemiesToRemove.contains(enemy)) {
-						double dist = Math.hypot(soldier.getX() - enemy.getX(), soldier.getY() - enemy.getY());
-						if (dist < 30 && !soldier.isBusy()) {
-							soldier.setTarget(enemy);
-							enemy.setBlocked(true);
-							break;
-						}
+				    if(!enemy.isDead() && !enemy.isBlocked() && !enemiesToRemove.contains(enemy)) {
+				    	double dist = Math.hypot(soldier.getX() - enemy.getX(), soldier.getY() - enemy.getY());
+
+				    	if (dist < 15 && !soldier.isBusy()) { 
+				    	    soldier.setTarget(enemy);
+				    	    enemy.setBlocked(true);
+				    	    enemy.setY(soldier.getY()); 
+				    	    break;
+				    	}
 					}
 				}
 			} else if(soldier.isBusy()){
 				soldier.fight();
 				if (!soldier.getEnemy().isDead()) {
+					soldier.getEnemy().setFacingRight(soldier.getX() > soldier.getEnemy().getX());
 					if (soldier.getEnemy().getCurrentCooldown() <= 0) {
 						soldier.takeDamage(soldier.getEnemy().getAttackDamage());
 						soldier.getEnemy().resetCooldown();
 					} else {
 						soldier.getEnemy().decreaseCooldown(); 
 					}
-					
 				}
-				
 			}
 		}
 		
@@ -445,27 +404,13 @@ public void upgradeSelectedTower() {
 							int type = queue.poll();
 							EnemyPath assignedPath = enemyPath.get(pathIndex);
 
-							if (type == Enemy.GOBLIN_TYPE) {
-							    // Goblin: Carne da cannone. Veloci, fragili, danno 1 vita.
-							    enemiesToAdd.add(new Enemy(40, 0.8, assignedPath, 1, type, tikCounter, 2, 11, 5));
-							} 
-							else if (type == Enemy.SCORPION_TYPE) {
-							    // Scorpione: Incursore. Molto veloci, saltano le difese, danno 1 vita.
-							    enemiesToAdd.add(new Enemy(80, 1.4, assignedPath, 1, type, tikCounter, 4, 8, 8));
-							} 
-							else if (type == Enemy.ORC_TYPE) {
-							    // Orco: Tank. Lentissimi, resistenti, tolgono ben 3 vite se passano!
-							    enemiesToAdd.add(new Enemy(350, 0.4, assignedPath, 3, type, tikCounter, 10, 15, 10));
-							} 
-							else if (type == Enemy.YETI_TYPE) {
-							    // BOSS FINALE: Inarrestabile. 6000 HP, toglie 20 vite in un colpo solo (game over).
-							    enemiesToAdd.add(new Enemy(6000, 0.15, assignedPath, 20, type, tikCounter, 200, 10, 400));
-							} 
+							if (type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40, 0.8, assignedPath, 5, type, tikCounter, 1, 11));
+							else if (type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(80, 1.4, assignedPath, 10, type, tikCounter, 1, 8));
+							else if (type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(350, 0.4, assignedPath, 20, type, tikCounter, 3, 15));
+							else if (type == 4) enemiesToAdd.add(new Enemy(6000, 0.15, assignedPath, 500, type, tikCounter, 20, 10));
 							
-							// CORREZIONE IMPORTANTE: Azzeriamo il timer dopo aver fatto uscire un nemico!
 							currentWave.getPathTimer().put(pathIndex, 0);
 						}else {
-						    // FONDAMENTALE: Se non è tempo di uscire, salviamo il timer aggiornato per il prossimo tick!
 						    currentWave.getPathTimer().put(pathIndex, timer);
 						}
 					}
@@ -473,40 +418,29 @@ public void upgradeSelectedTower() {
 			}
 			if (currentWave.isFinished() && enemies.isEmpty()) {
 				currentWaveIndex++;
-				spawnTimer = -90; // Pausa di 90 tick prima della prossima ondata
+				spawnTimer = -90; 
 			}
 		}
 		
-		// --- 7. FASE FINALE: AGGIORNAMENTO DI MASSA ---
 		activeSoldiers.addAll(soldiersToAdd);
 		activeSoldiers.removeAll(soldiersToRemove);
-		
 		projectiles.addAll(projectilesToAdd);
 		projectiles.removeAll(projectilesToRemove);
-		
 		enemies.addAll(enemiesToAdd);
 		enemies.removeAll(enemiesToRemove);
 	}
 	
 	@Override
-	public List<TowerSlot> getAvailableSlots(){
-		return slots;
-	}
+	public List<TowerSlot> getAvailableSlots(){ return slots; }
 	
 	@Override
-	public int getPlayerHealth() {
-		return playerHealth;
-	}
+	public int getPlayerHealth() { return playerHealth; }
 	
 	@Override
-	public int getMaxPlayerHealth() {
-		return currentLevel.getStartingHealth();
-	}
+	public int getMaxPlayerHealth() { return currentLevel.getStartingHealth(); }
 	
 	@Override
-	public int getGold() {
-		return gold;
-	}
+	public int getGold() { return gold; }
 	
 	public void subtractPlayerHealth(int health) {
 		playerHealth -= health;
@@ -516,39 +450,22 @@ public void upgradeSelectedTower() {
 		}
 	}
 	
-	public void addGold(int gold) {
-		this.gold += gold;
-	}
+	public void addGold(int gold) { this.gold += gold; }
 	
-	public boolean isGameOver() {
-		return gameOver;
-	}
+	public boolean isGameOver() { return gameOver; }
 	
-	// 2. Il tuo metodo aggiornato per il Rally Point
 	private Point calculateDefaultRallyPoint(int towerX, int towerY) {
 		Point closestPoint = new Point(towerX, towerY);
 		double minDistance = Double.MAX_VALUE;
-		
-		// Scorriamo TUTTI i percorsi della mappa (se hai più di una strada)
 		for(EnemyPath path : this.enemyPath) {
-			
-			// Scorriamo i punti (waypoints) dentro il singolo percorso
 			for(Point pathPoint : path.getWaypoints()) {
-				
-				// Il tuo Math.hypot è perfetto qui!
 				double dist = Math.hypot(towerX - pathPoint.getX(), towerY - pathPoint.getY());
-				
 				if(dist < minDistance) {
 					minDistance = dist;
-					
-					// Salviamo le coordinate del punto più vicino
 					closestPoint = new Point(pathPoint.getX(), pathPoint.getY());
 				}
 			}
 		} 
-		
 		return closestPoint;
 	}
-	
-	
 }
