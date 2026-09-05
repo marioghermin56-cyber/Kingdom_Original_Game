@@ -17,15 +17,13 @@ public class Soldier {
 	private Tower parentTower;
 	private boolean isFacingRight = true;
 	
-	// --- NUOVO CONTATORE MORTE ---
+	
 	private int deathTickCounter = 0;
 
 	public Soldier(double x, double y, int formationIndex, Tower parentTower) {
 		this.x = x;
 		this.y = y;
 		
-		this.maxHealth = 60; 
-		this.health = this.maxHealth;
 		this.attackCooldown = 30; 
 		this.damage = 3; 
 		
@@ -39,15 +37,16 @@ public class Soldier {
 		int towerLvl = parentTower.getLvl();
 		
 		if (towerLvl == 1) {
-			this.maxHealth = 60;
+			this.maxHealth = 80;
 			this.damage = 5;
 		} else if (towerLvl == 2) {
-			this.maxHealth = 100;
+			this.maxHealth = 115;
 			this.damage = 10;
 		} else if (towerLvl == 3) {
-			this.maxHealth = 150;
+			this.maxHealth = 165;
 			this.damage = 18;
 		}
+		this.health = this.maxHealth;
 	}
 	
 	public int getFormationIndex() { return this.formationIndex; }
@@ -126,15 +125,15 @@ public class Soldier {
 		int oldMaxHealth = this.maxHealth;
 		
 		if (newLvl == 2) {
-			this.maxHealth = 100;
-			this.damage = 6;
-		} else if (newLvl == 3) {
-			this.maxHealth = 150;
+			this.maxHealth = 115;
 			this.damage = 10;
+		} else if (newLvl == 3) {
+			this.maxHealth = 165;
+			this.damage = 18;
 		}
+	
 		this.health += (this.maxHealth - oldMaxHealth); 
 	}
-    
     public void updateTikCounter() { tikCounter++; }
     
     public int getDeathTickCounter() { return deathTickCounter; }

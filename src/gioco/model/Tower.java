@@ -60,17 +60,17 @@ public class Tower {
 		if (this.type == ARCHER_TYPE) {
             this.damage += 12;      
             this.cooldown -= 3;     
-            this.range += 25;       // Raggio upgrade ORIGINALE
+            this.range += 25;       
         } 
         else if (this.type == MAGE_TYPE) {
             this.damage += 55;      
             this.cooldown -= 5;
-            this.range += 15;       // Raggio upgrade ORIGINALE
+            this.range += 15;      
         } 
         else if (this.type == CANNON_TYPE) {
             this.damage += 28;      
             this.cooldown -= 10;    
-            this.range += 10;       // Raggio upgrade ORIGINALE 
+            this.range += 10;       
         }
         else if (this.type == BARRACKS_TYPE) {
             this.cooldown = Math.max(120, this.cooldown - 120); 

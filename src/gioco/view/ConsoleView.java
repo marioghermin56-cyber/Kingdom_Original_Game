@@ -64,8 +64,7 @@ public class ConsoleView implements IView {
 	public void showMessage(String message) {
 		System.out.println("MESSAGGIO >> " + message);
 	}
-
-	// --- METODI AUDIO MANCANTI ---
+	
 	@Override
 	public void addMusicListener(ActionListener listener) {
 		// Non implementato per la console
@@ -85,8 +84,7 @@ public class ConsoleView implements IView {
 	public void updateSoundIcon(boolean isMuted) {
 		// Non implementato per la console
 	}
-	
-	// --- ALTRI LISTENER ---
+
 	@Override
 	public void addArcherListener(ActionListener listener) {
 		// Non implementato per la console
@@ -127,7 +125,6 @@ public class ConsoleView implements IView {
 		// Non implementato per la console
 	}
 
-	// --- METODO AGGIUNTO PER CORRISPONDERE A IView ---
 	@Override
 	public void updateUnlockedLevels(int maxUnlockedLevel, java.util.Map<Integer, Integer> levelStars) {
 		// Non implementato per la console

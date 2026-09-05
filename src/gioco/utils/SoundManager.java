@@ -6,26 +6,21 @@ import java.net.URL;
 public class SoundManager {
     
     private static Clip currentMusic;
-    private static String currentTrackPath = ""; // Si ricorda quale canzone sta suonando!
+    private static String currentTrackPath = ""; 
 
-    // Unico metodo per far partire o riprendere QUALSIASI canzone
     public static void playMusic(String filePath) {
         try {
-            // Se c'è già una canzone, controlliamo cos'è
             if (currentMusic != null && currentMusic.isOpen()) {
                 if (currentTrackPath.equals(filePath)) {
-                    // È la STESSA: togliamo solo la pausa
                     currentMusic.start();
                     currentMusic.loop(Clip.LOOP_CONTINUOUSLY);
                     return;
                 } else {
-                    // È DIVERSA (es. dal menu passiamo al livello): stoppiamo la vecchia
                     currentMusic.stop();
                     currentMusic.close();
                 }
             }
 
-            // Carichiamo la nuova traccia
             URL url = SoundManager.class.getResource(filePath);
             if (url != null) {
                 AudioInputStream audioInput = AudioSystem.getAudioInputStream(url);
@@ -33,7 +28,7 @@ public class SoundManager {
                 currentMusic.open(audioInput);
                 currentMusic.loop(Clip.LOOP_CONTINUOUSLY);
                 currentMusic.start();
-                currentTrackPath = filePath; // Salviamo il nome in memoria
+                currentTrackPath = filePath; 
             } else {
                 System.err.println("Impossibile trovare il file audio: " + filePath);
             }
@@ -57,4 +52,4 @@ public class SoundManager {
             currentTrackPath = "";
         }
     }
-} //ciao
+} 

@@ -31,10 +31,10 @@ public class Projectile {
         this.startX = x;
         this.startY = y;
         
-        // RIMOSSO IL +18: e.getX() è già il centro perfetto!
+       
         this.facingRight = target.getX() >= x;
 
-        // RIMOSSI I +18 per calcolare la distanza iniziale corretta
+        
         double initialDist = Math.hypot(target.getX() - startX, target.getY() - startY);
         this.dynamicTotalDistance = initialDist;
 
@@ -73,9 +73,7 @@ public class Projectile {
         double distanceY = targetY - this.y;
         double distanceFromCenter = Math.hypot(distanceX, distanceY);
 
-        // IL FIX È QUI: Aumentato il raggio di collisione da 3.0 a 15.0
-        // Ora la freccia registra l'impatto appena tocca il bordo esterno del nemico,
-        // evitando di trapassarlo visivamente.
+     
         if (distanceFromCenter <= 15.0 || distanceFromCenter < this.currentSpeed) {
             this.hit = true;
             processHit(allEnemies);

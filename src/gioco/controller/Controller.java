@@ -142,9 +142,9 @@ this.levelStars = gioco.utils.SaveManager.loadStars(); // <-- CARICHIAMO LE STEL
 	private int calculateStars(int currentHealth, int maxHealth) {
         double percentage = (double) currentHealth / maxHealth;
         
-        if (percentage >= 0.90) return 3;      // Vittoria schiacciante
-        else if (percentage >= 0.50) return 2; // Buona vittoria
-        else if (percentage > 0) return 1;     // Sopravvissuto
+        if (percentage >= 0.90) return 3;      
+        else if (percentage >= 0.50) return 2; 
+        else if (percentage > 0) return 1;     
         return 0;
     }
 	

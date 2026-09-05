@@ -610,9 +610,7 @@ public class SwingView implements IView {
             redBar = loadImage("/assets/HEALTHBAR/health_bar-04.png");
             hoveredSlot = loadImage("/assets/background/39.png");
 
-            // --- CARICAMENTO SOLDATI ---
             for (int i = 0; i < 20; i++) {
-                // Tutte le animazioni dei soldati partono da 000
                 soldierFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_walk_%03d.png", i));
                 soldierIdleFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_idle_%03d.png", i));
                 soldierFightFrames[i] = loadImage(String.format("/assets/BARRACK_TOWER/SOLDIERS/8_enemies_1_attack_%03d.png", i));
@@ -622,13 +620,11 @@ public class SwingView implements IView {
             // --- CARICAMENTO ORCO ---
             BufferedImage[] orcFrames = new BufferedImage[19];
             for (int i = 0; i < 19; i++) {
-                // Walk parte da 001 (i + 1)
                 orcFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_walk_%03d.png", i + 1));
             }
             BufferedImage[] orcAttackFrames = new BufferedImage[20];
             BufferedImage[] orcDeathFrames = new BufferedImage[20];
             for (int i = 0; i < 20; i++) {
-                // Attack e Die partono da 000 (i)
                 orcAttackFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_attack_%03d.png", i));
                 orcDeathFrames[i] = loadImage(String.format("/assets/ORC/5_enemies_1_die_%03d.png", i));
             }
@@ -636,16 +632,13 @@ public class SwingView implements IView {
             enemyAttackAssets.put(Enemy.ORC_TYPE, orcAttackFrames);
             enemyDeathAssets.put(Enemy.ORC_TYPE, orcDeathFrames);
             
-            // --- CARICAMENTO SCORPIONE ---
             BufferedImage[] scorpionFrames = new BufferedImage[10];
             for (int i = 0; i < 10; i++) {
-                // Walk parte da 001
                 scorpionFrames[i] = loadImage(String.format("/assets/SCORPION/1_enemies_1_walk_%03d.png", i + 1));
             }
             BufferedImage[] scorpionAttackFrames = new BufferedImage[10];
             BufferedImage[] scorpionDeathFrames = new BufferedImage[10];
             for (int i = 0; i < 10; i++) {
-                // Attack e Die partono da 000
                 scorpionAttackFrames[i] = loadImage(String.format("/assets/SCORPION/1_enemies_1_attack_%03d.png", i));
                 scorpionDeathFrames[i] = loadImage(String.format("/assets/SCORPION/1_enemies_1_die_%03d.png", i));
             }
@@ -653,16 +646,13 @@ public class SwingView implements IView {
             enemyAttackAssets.put(Enemy.SCORPION_TYPE, scorpionAttackFrames);
             enemyDeathAssets.put(Enemy.SCORPION_TYPE, scorpionDeathFrames);
             
-            // --- CARICAMENTO GOBLIN ---
             BufferedImage[] goblinFrames = new BufferedImage[15];
             for (int i = 0; i < 15; i++) {
-                // Walk parte da 001
                 goblinFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_walk_%03d.png", i + 1));
             }
             BufferedImage[] goblinAttackFrames = new BufferedImage[15];
             BufferedImage[] goblinDeathFrames = new BufferedImage[15];
             for (int i = 0; i < 15; i++) {
-                // Attack e Die partono da 000
                 goblinAttackFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_attack_%03d.png", i));
                 goblinDeathFrames[i] = loadImage(String.format("/assets/GOBLIN/3_enemies_1_die_%03d.png", i));
             }
@@ -670,16 +660,13 @@ public class SwingView implements IView {
             enemyAttackAssets.put(Enemy.GOBLIN_TYPE, goblinAttackFrames);
             enemyDeathAssets.put(Enemy.GOBLIN_TYPE, goblinDeathFrames);
             
-            // --- CARICAMENTO BOSS (YETI) ---
             BufferedImage[] bossFrames = new BufferedImage[9];
             for (int i = 0; i < 9; i++) {
-                // Walk parte da 001
                 bossFrames[i] = loadImage(String.format("/assets/BOSS/2_enemies_1_WALK_%03d.png", i + 1));
             }
             BufferedImage[] bossAttackFrames = new BufferedImage[10];
             BufferedImage[] bossDeathFrames = new BufferedImage[10];
             for (int i = 0; i < 10; i++) {
-                // Attack e Die partono da 000
                 bossAttackFrames[i] = loadImage(String.format("/assets/BOSS/2_enemies_1_ATTACK_%03d.png", i));
                 bossDeathFrames[i] = loadImage(String.format("/assets/BOSS/2_enemies_1_DIE_%03d.png", i));
             }
@@ -1020,7 +1007,7 @@ public class SwingView implements IView {
                 int ex = (int) e.getX();
                 int ey = (int) e.getY();
                 
-                boolean isBoss = (e.getType() == 4);
+                boolean isBoss = (e.getType() == Enemy.YETI_TYPE);
                 
                 int drawW = isBoss ? 72 : 36;
                 int drawH = isBoss ? 72 : 36;

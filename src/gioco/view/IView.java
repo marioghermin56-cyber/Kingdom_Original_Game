@@ -34,8 +34,7 @@ public interface IView {
 	// --- Metodi Gestione View ---
 	void setStartButtonListener(ActionListener listener);
 	void switchToGame();
-	
-	// --- NUOVO: Metodo per la progressione dei livelli ---
-	// Cambia questa riga:
+
+	// --- Metodi Gestione Livelli ---
 	void updateUnlockedLevels(int maxUnlockedLevel, java.util.Map<Integer, Integer> levelStars);
 }

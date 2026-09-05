@@ -207,34 +207,29 @@ public class KingdomRushModel implements IModel{
 		List<Projectile> projectilesToAdd = new ArrayList<>();
 		List<Projectile> projectilesToRemove = new ArrayList<>();
 
-		// 2. MOVIMENTO E MORTE NEMICI
-		// 2. MOVIMENTO E MORTE NEMICI
+		// 1. NEMICI
 		for (Enemy enemy : enemies) {
 		    enemy.move();
 
-		    // Controlliamo PRIMA se è arrivato alla fine del percorso
+		    
 		    if (enemy.hasReachedEnd()) {
-		        
-		        // Se è arrivato ed è il Boss (tipo 4), toglie 5 vite
-		        if (enemy.getType() == 4) {
-		            subtractPlayerHealth(5);
-		        } else {
-		            // Tutti gli altri nemici tolgono 1 vita
-		            subtractPlayerHealth(1);
-		        }
-		        enemiesToRemove.add(enemy); 
-		        
+		    	
+		        subtractPlayerHealth(enemy.getValue());
+		        enemiesToRemove.add(enemy); 	        
 		    } else if (enemy.isDying()) {
+		    	
 		        if (enemy.getDeathTickCounter() == 1) {
-		            addGold(enemy.getValue());
+		        	
+		            addGold(enemy.getGoldReward());
 		        }
 		        if (enemy.getDeathTickCounter() >= 40) {
+		        	
 		            enemiesToRemove.add(enemy);
 		        }
 		    }
 		}
 		
-		// 3. TORRI E CASERME
+		//2. TORRI
 		for (TowerSlot slot : slots) {
 			if (slot.isOccupied()) {
 				Tower tower = slot.getTower();
@@ -327,7 +322,7 @@ public class KingdomRushModel implements IModel{
 			}
 		}
 		
-		// 4. SOLDATI
+		// 3. SOLDATI
 		for (Soldier soldier : activeSoldiers) {
 			soldier.updateTikCounter();
 			
@@ -378,7 +373,7 @@ public class KingdomRushModel implements IModel{
 			}
 		}
 		
-		// 5. PROIETTILI IN VOLO
+		// 4. PROIETTILI IN VOLO
 		for (Projectile p : projectiles) {
 			p.move(enemies);
 			if (p.hasHit()) {
@@ -386,7 +381,7 @@ public class KingdomRushModel implements IModel{
 			}
 		}
 		
-		// 6. SPAWN DELLE ONDATE
+		// 5. SPAWN DELLE ONDATE
 		if (currentWaveIndex < waves.size()) {
 			Wave currentWave = waves.get(currentWaveIndex);
 			
@@ -404,10 +399,10 @@ public class KingdomRushModel implements IModel{
 							int type = queue.poll();
 							EnemyPath assignedPath = enemyPath.get(pathIndex);
 
-							if (type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40, 0.8, assignedPath, 5, type, tikCounter, 1, 11));
-							else if (type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(80, 1.4, assignedPath, 10, type, tikCounter, 1, 8));
-							else if (type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(350, 0.4, assignedPath, 20, type, tikCounter, 3, 15));
-							else if (type == 4) enemiesToAdd.add(new Enemy(6000, 0.15, assignedPath, 500, type, tikCounter, 20, 10));
+							if (type == Enemy.GOBLIN_TYPE) enemiesToAdd.add(new Enemy(40, 0.8, assignedPath, 1, type, tikCounter, 2, 11, 5));
+							else if (type == Enemy.SCORPION_TYPE) enemiesToAdd.add(new Enemy(80, 1.4, assignedPath, 1, type, tikCounter, 4, 8, 8));
+							else if (type == Enemy.ORC_TYPE) enemiesToAdd.add(new Enemy(350, 0.4, assignedPath, 3, type, tikCounter, 10, 15, 10));
+							else if (type == Enemy.YETI_TYPE) enemiesToAdd.add(new Enemy(6000, 0.15, assignedPath, 20, type, tikCounter, 200, 10, 400));
 							
 							currentWave.getPathTimer().put(pathIndex, 0);
 						}else {

@@ -5,15 +5,9 @@ import java.util.List;
 public class Enemy {
 	
 	public static final int GOBLIN_TYPE = 1;
-	public static final int BLACKWIZARD_TYPE = 2;
-	public static final int DARKGIANT_TYPE = 3;
-	public static final int BLADESWORDSMAN_TYPE = 4;
-	public static final int GHOST_TYPE = 5;
-	public static final int LITTLEDEVIL_TYPE = 6;
 	public static final int ORC_TYPE = 7;
 	public static final int SCORPION_TYPE = 8;
-	public static final int SKINHEAD_TYPE = 9;
-	public static final int DEADSWORDSMAN_TYPE = 10;
+	public static final int YETI_TYPE = 9;
 	
 	private double x, y;
 	private int health;
@@ -30,13 +24,13 @@ public class Enemy {
 	private int attackCooldown;
 	private int currentCooldown;
 	private boolean isFacingRight = true;
-	
-	// --- NUOVE VARIABILI PER LE ANIMAZIONI ---
+	private int goldReward;
+
 	private boolean isAttacking = false;
 	private boolean isDying = false;
 	private int deathTickCounter = 0;
 	
-	public Enemy(int health, double speed, EnemyPath path, int value, int type, int tikCounter, int attackDamage, int attackCooldown) {
+	public Enemy(int health, double speed, EnemyPath path, int value, int type, int tikCounter, int attackDamage, int attackCooldown, int goldReward) {
 		this.health = health;
 		this.maxHealth = health;
 		this.speed = speed;
@@ -49,6 +43,7 @@ public class Enemy {
 		this.attackDamage = attackDamage;
 		this.attackCooldown = attackCooldown;
 		this.currentCooldown = attackCooldown;
+		this.goldReward = goldReward;
 		
 		if(path != null && !path.getWaypoints().isEmpty()) {
 			gioco.model.Point spawnPoint = path.getWaypoints().get(0);
@@ -109,13 +104,17 @@ public class Enemy {
 		return health;
 	}
 	
+	public int getGoldReward() {
+		return this.goldReward;
+	}
+	
 	public boolean hasReachedEnd() {
 		return targetWayPointIndex >= path.getWaypoints().size();
 	}
 	
 	public void takeDamage(int amount) {
 		this.health -= amount;
-        // Se la vita scende a 0 e non stava già morendo, attiva lo stato
+        
         if (this.health <= 0 && !this.isDying) {
             this.health = 0;
             this.isDying = true;
@@ -130,7 +129,7 @@ public class Enemy {
 		this.isBlocked = blocked;
 	}
 	
-    // --- NUOVI METODI PER GESTIRE GLI STATI ---
+   
     public boolean isAttacking() { return isAttacking; }
     public void setAttacking(boolean attacking) { this.isAttacking = attacking; }
 
@@ -140,15 +139,13 @@ public class Enemy {
     public void incrementDeathTick() { this.deathTickCounter++; }
 	
     public void move() {
-        // Se sta morendo, aumenta il contatore dell'animazione e non muoverti
+        
         if (isDying) {
             incrementDeathTick();
             return;
         }
 
-        // FONDAMENTALE: Aumentiamo SEMPRE il tikCounter prima dei blocchi. 
-        // In questo modo, anche se il nemico è fermo a combattere, 
-        // il suo "orologio" interno continua a girare, permettendo all'animazione di scorrere.
+        
         this.tikCounter++;
 
 		if(isBlocked || hasReachedEnd()) {
